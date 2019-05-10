@@ -1,0 +1,5 @@
+<launch>
+  <node name="bot" pkg="control_test" type="myrobot" respawn="false"
+    output="screen" ns="/bot" />
+
+</launch>
