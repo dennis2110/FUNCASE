@@ -50,7 +50,13 @@
   <run_depend>controller_manager</run_depend>
   <build_depend>imu_sensor_controller</build_depend>
   <run_depend>imu_sensor_controller</run_depend>
-  
+
+  <build_depend>serial</build_depend>
+  <run_depend>serial</run_depend>
+  <!--<build_depend>serial</build_depend>
+  <build_export_depend>serial</build_export_depend>
+  <exec_depend>serial</exec_depend>-->
+
 
   <!-- The export tag contains other, unspecified, tags -->
   <export>

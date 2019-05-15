@@ -8,6 +8,7 @@ find_package(catkin REQUIRED COMPONENTS
   hardware_interface
   controller_manager
 #   ros_control
+  serial
   roscpp
 )
 
@@ -103,7 +104,7 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES control_test
-#  CATKIN_DEPENDS hardware_interface roscpp
+  CATKIN_DEPENDS serial #hardware_interface roscpp
   DEPENDS system_lib
 )
 
@@ -115,6 +116,7 @@ catkin_package(
 ## Your package locations should be listed before other locations
 # include_directories(include)
 include_directories(
+  include
   ${catkin_INCLUDE_DIRS}
 )
 
@@ -129,7 +131,8 @@ include_directories(
 # add_dependencies(control_test ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Declare a C++ executable
-add_executable(myrobot src/myrobot.cpp)
+add_executable(myrobot src/myrobot.cpp
+                       src/arduserial.cpp)
 
 ## Add cmake target dependencies of the executable
 ## same as for the library above

@@ -52,13 +52,13 @@ int main(int argc, char** argv)
         {
           read = ser.read(ser.available());
           ////////////////////////////////
-          std::cout<< "read: " << ser.available()<<std::endl;
+          //std::cout<< "read: " << ser.available()<<std::endl;
           ////////////////////////////////
           ROS_DEBUG("read %i new characters from serial port, adding to %i characters of old input.", (int)read.size(), (int)input.size());
 
           input += read;
           ////////////////////////////////
-          std::cout <<"input: " <<input.length() <<std::endl;
+          //std::cout <<"input: " <<input.length() <<std::endl;
           ////////////////////////////////
           while (input.length() >= 5) // while there might be a complete package in input
           {
@@ -68,20 +68,22 @@ int main(int argc, char** argv)
             {
               ROS_DEBUG("found possible start of data packet at position %d", data_packet_start);
               ////////////////////////////////
-              std::cout <<"data_packet_start: " <<data_packet_start <<std::endl;
+              //std::cout <<"data_packet_start: " <<data_packet_start <<std::endl;
               ////////////////////////////////
               if ((input.length() >= data_packet_start + 5) && (input.compare(data_packet_start + 4, 1, "\n") == 0))  //check if positions 26,27 exist, then test values
               {
                 ROS_DEBUG("seems to be a real data package: long enough and found end characters");
                 //read input data here
-
+                int16_t pwmA = 0xff &(char)input[data_packet_start + 2];
+                int16_t pwmB = 0xff &(char)input[data_packet_start + 3];
+                ROS_INFO("read %d\t%d",pwmA,pwmB);
 
 
 
                 uint8_t received_message_number = input[data_packet_start + 2];
                 ROS_DEBUG("received message number: %i", received_message_number);
                 ////////////////////////////////
-                std::cout <<"message_number: " <<received_message_number <<std::endl;
+                //std::cout <<"message_number: " <<received_message_number <<std::endl;
                 ////////////////////////////////
 
 

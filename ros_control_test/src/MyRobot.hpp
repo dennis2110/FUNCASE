@@ -2,12 +2,12 @@
 #include <hardware_interface/joint_state_interface.h>
 #include <hardware_interface/robot_hw.h>
 #include <imu_sensor_controller/imu_sensor_controller.h>
-
+#include "arduserial.h"
 #include <iostream>
 class MyRobot : public hardware_interface::RobotHW
 {
 public:
-  MyRobot()
+  MyRobot():serialtest("/dev/ttyUSB0",7)
  {
    cmd[0]=0;
    cmd[1]=0;
@@ -68,6 +68,8 @@ public:
    registerInterface(&jnt_vel_interface);
    registerInterface(&jnt_eff_interface);
    registerInterface(&imu_interface);
+
+   serialtest.init();
 }
 
   virtual ~MyRobot()
@@ -75,12 +77,34 @@ public:
 
   void write()
   {
-	  std::cout<<"write "<<"  "<<cmd[0]<<" "<<cmd[1]<<std::endl;
+    std::cout<<"write "<<"  "<<pos[0]<<" "<<pos[1]<<std::endl;
+    //std::cout<<"write "<<"  "<<cmd[0]<<" "<<cmd[1]<<std::endl;
+    /*uint8_t data[7]={'0','2','3','2','0','5','\n'};
+    int temp = (int)pos[0];
+    for (int i=0;i<3;i++) {
+      data[2-i] = temp%10+48;
+      temp = temp/10;
+    }
+    temp = (int)pos[1];
+    for (int i=0;i<3;i++) {
+      data[5-i] = temp%10+48;
+      temp = temp/10;
+    }
+    std::cout<<"data "<<"  "<<data[0]<<" "<<data[1]<<" "<<data[2]<<std::endl;
+    serialtest.write(data);*/
+
+    //int8_t data[5]={82,69,11,68,'\n'};
+    uint8_t data[5]={255,0,36,2,36};
+    serialtest.write(data, 5);
   }
 
   void read()
   {
-          std::cout<<"read "<<"  "<<pos[0]<<" "<<pos[1]<<std::endl;
+    serialtest.read();
+    pos[0] = serialtest.PWM_A;
+    pos[1] = serialtest.PWM_B;
+    std::cout<<"read c"<<"  "<<serialtest.PWM_A<<" "<<serialtest.PWM_B<<std::endl;
+    std::cout<<"read d"<<"  "<<pos[0]<<" "<<pos[1]<<std::endl;
   }
 
 private:
@@ -103,4 +127,6 @@ private:
   double pos[2];
   double vel[2];
   double eff[2];
+
+  ArduSerial serialtest;
 };

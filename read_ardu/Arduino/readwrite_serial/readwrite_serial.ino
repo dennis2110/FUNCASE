@@ -19,15 +19,43 @@ void setup() {
 void loop() {
   int switchStatus = digitalRead(7);
   if(switchStatus == 0){
+    //write
     message[2] = 79;
     message[3] = 80;
-    //Serial.println(switchStatus);
     Serial.write(message, 5);
-  }else{
+
+    //read
+    if(Serial.available()){
+      i=0;
+      while((chr = Serial.read()) != '\n'){
+        if(chr >= '0' && chr <= '9' && i < 6) {
+          readcmd[i] = chr;
+          Serial.print(readcmd[i]);
+          Serial.print("\t");
+          i++;
+        }
+      }
+      Serial.print("\n");
+    }
+  }else{ 
+    //write
     message[2] = 67;
     message[3] = 76;
-    //Serial.println(switchStatus);
     Serial.write(message, 5);
+    
+    //read
+    if(Serial.available()){
+      i=0;
+      while((chr = Serial.read()) != '\n'){
+        if(chr >= '0' && chr <= '9' && i < 6) {
+          readcmd[i] = chr;
+          Serial.print(readcmd[i]);
+          Serial.print("\t");
+          i++;
+        }
+      }
+      Serial.print("\n");
+    }
   }
   
 //  if(Serial.available()){
