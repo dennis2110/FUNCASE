@@ -110,7 +110,7 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES funcase_bringup
-#  CATKIN_DEPENDS controller_manager geometry_msgs hardware_interface imu_sensor_controller ros_control sensor_msgs serial std_msgs
+  CATKIN_DEPENDS serial #controller_manager geometry_msgs hardware_interface imu_sensor_controller ros_control sensor_msgs serial std_msgs
 #  DEPENDS system_lib
 )
 
@@ -121,7 +121,7 @@ catkin_package(
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
 include_directories(
-# include
+  include
   ${catkin_INCLUDE_DIRS}
 )
 
@@ -139,6 +139,22 @@ include_directories(
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
 # add_executable(${PROJECT_NAME}_node src/funcase_bringup_node.cpp)
+
+
+
+add_executable(funcase_main src/funcase_main.cpp
+                            src/funcase_hw.cpp
+                            src/arduserial.cpp
+                            src/serial_imu.cpp
+                            src/serial_diff.cpp)
+
+add_dependencies(funcase_main ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+
+target_link_libraries(funcase_main
+   ${catkin_LIBRARIES}
+)
+
+
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
