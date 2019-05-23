@@ -36,21 +36,21 @@ void loop() {
   
 /////////////////////////////////
 
-  Serial.print(map(analogRead(A0),0,1023,0,255));
+  /*Serial.print(map(analogRead(A0),0,1023,0,255));
   Serial.print("\t");
   Serial.print(map(analogRead(A1),0,1023,0,255));
   Serial.print("\t");
   Serial.print(map(analogRead(A3),0,1023,0,255));
   Serial.print("\t");
-  Serial.println(map(analogRead(A4),0,1023,0,255));
+  Serial.println(map(analogRead(A4),0,1023,0,255));*/
 
-  /*Serial.print(MotorCMD[0]);
+  Serial.print(MotorCMD[0]);
   Serial.print("\t");
   Serial.print(MotorCMD[1]);
   Serial.print("\t");
   Serial.print(MotorCMD[2]);
   Serial.print("\t");
-  Serial.println(MotorCMD[3]);*/
+  Serial.println(MotorCMD[3]);
 
   if(MotorCMD[0]==50){
     digitalWrite(13,HIGH);

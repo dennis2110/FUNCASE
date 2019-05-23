@@ -67,6 +67,8 @@ FuncaseRobot::~FuncaseRobot(){
 }
 
 void FuncaseRobot::init(ros::NodeHandle *node){
+  m_track_line_pub = node->advertise<std_msgs::UInt8MultiArray>("/track_line_sensor",100);
+
   for(int i=0;i<4;i++){
     writediff[i]=0;
   }
@@ -80,12 +82,17 @@ void FuncaseRobot::read(){
   //for(int i=0;i<4;i++){
   //  orientation[i] = serialimu.orientation[i];
   //}
-  wheel_vel[0]= static_cast<double>(serialdiff.raw_diff[0]); //wheel_vel is PWM of wheel
-  wheel_vel[1]= static_cast<double>(serialdiff.raw_diff[2]);
-  wheel_eff[0]= static_cast<double>(serialdiff.raw_diff[1]); //wheel_eff is mode of wheel
-  wheel_eff[1]= static_cast<double>(serialdiff.raw_diff[3]);
+//  wheel_vel[0]= static_cast<double>(serialdiff.raw_diff[0]); //wheel_vel is PWM of wheel
+//  wheel_vel[1]= static_cast<double>(serialdiff.raw_diff[2]);
+//  wheel_eff[0]= static_cast<double>(serialdiff.raw_diff[1]); //wheel_eff is mode of wheel
+//  wheel_eff[1]= static_cast<double>(serialdiff.raw_diff[3]);
+  cny70[0] = serialdiff.raw_diff[0];
+  cny70[1] = serialdiff.raw_diff[1];
+  cny70[2] = serialdiff.raw_diff[2];
+  cny70[3] = serialdiff.raw_diff[3];
   //ROS_INFO("read imu data: %4.3f %4.3f %4.3f %4.3f",orientation[0],orientation[1],orientation[2],orientation[3]);
-  ROS_INFO("read diff data: %4.1f %4.1f Mode: %1.1f %1.1f",wheel_vel[0],wheel_vel[1],wheel_eff[0],wheel_eff[1]);
+  //ROS_INFO("read diff data: %4.1f %4.1f Mode: %1.1f %1.1f",wheel_vel[0],wheel_vel[1],wheel_eff[0],wheel_eff[1]);
+  publish_sensor_data();
 }
 
 void FuncaseRobot::write(){
@@ -118,4 +125,12 @@ void FuncaseRobot::wheelcmd2writediff(double cmd,int n){
     writediff[n] = temp;
     writediff[n+1] = 1;
   }
+}
+
+void FuncaseRobot::publish_sensor_data(){
+  std_msgs::UInt8MultiArray sensor_msg;
+  for (int i=0;i<4;i++) {
+    sensor_msg.data.push_back(cny70[i]);
+  }
+  m_track_line_pub.publish(sensor_msg);
 }
