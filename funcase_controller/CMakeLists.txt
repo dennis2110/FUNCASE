@@ -106,7 +106,7 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES funcase_controller
-#  CATKIN_DEPENDS control_msgs controller_interface dynamic_reconfigure trajectory_msgs
+  CATKIN_DEPENDS control_msgs controller_interface dynamic_reconfigure trajectory_msgs
 #  DEPENDS system_lib
 )
 
@@ -117,14 +117,15 @@ catkin_package(
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
 include_directories(
-# include
+  include
   ${catkin_INCLUDE_DIRS}
 )
 
 ## Declare a C++ library
-# add_library(${PROJECT_NAME}
-#   src/${PROJECT_NAME}/funcase_controller.cpp
-# )
+ add_library(${PROJECT_NAME}
+   src/track_line_controller.cpp
+#  src/${PROJECT_NAME}/funcase_controller.cpp
+ )
 
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
@@ -146,10 +147,12 @@ include_directories(
 ## same as for the library above
 # add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
+#add_dependencies(funcase_controllers ${PROJECT_NAME}_gencfg)
+
 ## Specify libraries to link a library or executable target against
-# target_link_libraries(${PROJECT_NAME}_node
-#   ${catkin_LIBRARIES}
-# )
+ #target_link_libraries(${PROJECT_NAME}
+ #  ${catkin_LIBRARIES}
+ #)
 
 #############
 ## Install ##

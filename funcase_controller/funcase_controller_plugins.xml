@@ -1,0 +1,11 @@
+<library path="lib/libfuncase_controllers">
+
+  <class name="funcase_controllers/TrackLineController"
+    type="funcase_controllers::TrackLineController"
+    base_class_type="controller_interface::ControllerBase">
+    <description>
+      The Track Line Controller expects an EffortJointInterface type of hardware interface.
+    </description>
+  </class>
+
+</library>
