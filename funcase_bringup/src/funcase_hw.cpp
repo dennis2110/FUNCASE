@@ -1,6 +1,6 @@
 #include "funcase_hw.h"
 
-FuncaseRobot::FuncaseRobot() : serialimu("/dev/ttyACM0",5), serialdiff("/dev/ttyUSB0",5){
+FuncaseRobot::FuncaseRobot() : /*serialimu("/dev/ttyUSB1",5),*/ serialdiff("/dev/ttyUSB0",5){
   for (int i=0;i<2;i++) {
     wheel_cmd[i] = 0;
     wheel_eff[i] = 0;
@@ -67,24 +67,55 @@ FuncaseRobot::~FuncaseRobot(){
 }
 
 void FuncaseRobot::init(ros::NodeHandle *node){
-  writediff[4] = 36;
+  for(int i=0;i<4;i++){
+    writediff[i]=0;
+  }
+  writediff[4] = 10;
+  ROS_INFO("funcasebot init");
 }
 
 void FuncaseRobot::read(){
-  serialimu.read();
+  //serialimu.read();
   serialdiff.read();
-  for(int i=0;i<4;i++){
-    orientation[i] = serialimu.orientation[i];
-  }
-  ROS_INFO("read imu data: %4.3f %4.3f %4.3f %4.3f",orientation[0],orientation[1],orientation[2],orientation[3]);
-  ROS_INFO("read diff data: %03d %03d %03d %03d",serialdiff.raw_diff[0],serialdiff.raw_diff[1],serialdiff.raw_diff[2],serialdiff.raw_diff[3]);
+  //for(int i=0;i<4;i++){
+  //  orientation[i] = serialimu.orientation[i];
+  //}
+  wheel_vel[0]= static_cast<double>(serialdiff.raw_diff[0]); //wheel_vel is PWM of wheel
+  wheel_vel[1]= static_cast<double>(serialdiff.raw_diff[2]);
+  wheel_eff[0]= static_cast<double>(serialdiff.raw_diff[1]); //wheel_eff is mode of wheel
+  wheel_eff[1]= static_cast<double>(serialdiff.raw_diff[3]);
+  //ROS_INFO("read imu data: %4.3f %4.3f %4.3f %4.3f",orientation[0],orientation[1],orientation[2],orientation[3]);
+  ROS_INFO("read diff data: %4.1f %4.1f Mode: %1.1f %1.1f",wheel_vel[0],wheel_vel[1],wheel_eff[0],wheel_eff[1]);
 }
 
 void FuncaseRobot::write(){
-  writediff[0] = 255;
-  writediff[1] = 0;
-  writediff[2] = 105;
-  writediff[3] = 2;
+  wheel_cmd[0] = 50;
+  wheel_cmd[1] = -120;
+  ROS_INFO("diff data: %03d %03d %03d %03d",writediff[0],writediff[1],writediff[2],writediff[3]);
+  wheelcmd2writediff(wheel_cmd[0],0); //set writediff[0 and 1] from wheel_cmd[0]
+  wheelcmd2writediff(wheel_cmd[1],2); //set writediff[2 and 3] from wheel_cmd[0]
+
+  /*writediff[0] = 50;//static_cast<uint8_t>(wheel_cmd[0]);
+  writediff[1] = 1;
+  writediff[2] = 213;
+  writediff[3] = 1;*/
+
   serialdiff.write(writediff,5);
   ROS_INFO("write diff data: %03d %03d %03d %03d",writediff[0],writediff[1],writediff[2],writediff[3]);
+}
+
+void FuncaseRobot::wheelcmd2writediff(double cmd,int n){
+  uint8_t temp;
+  if(cmd == 0.0){
+    writediff[n] = 0;
+    writediff[n+1] = 3;
+  }else if (cmd < 0) {
+    temp = static_cast<uint8_t>(-cmd);
+    writediff[n] = temp;
+    writediff[n+1] = 2;
+  }else if (cmd > 0) {
+    temp = static_cast<uint8_t>(cmd);
+    writediff[n] = temp;
+    writediff[n+1] = 1;
+  }
 }

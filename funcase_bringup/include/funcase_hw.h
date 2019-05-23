@@ -22,7 +22,7 @@ public:
   void read();
   void write();
 private:
-
+  void wheelcmd2writediff(double cmd, int n);
 
 public:
 
@@ -45,7 +45,7 @@ private:
   double wheel_vel[2];
   double wheel_eff[2];
 
-  SerialIMU serialimu;
+  //SerialIMU serialimu;
   SerialDiff serialdiff;
 
   uint8_t writediff[5];

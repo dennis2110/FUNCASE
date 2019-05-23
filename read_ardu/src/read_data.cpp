@@ -47,6 +47,11 @@ int main(int argc, char** argv)
     {
       if (ser.isOpen())
       {
+        //write serial
+        uint8_t TwoPWM[7] = {40,'2','3','2','5','5','\n'};
+
+        size_t size_write = ser.write(TwoPWM, 7);
+        ROS_INFO("write:%d", static_cast<int>(size_write));
         // read string from serial device
         if(ser.available())
         {
@@ -74,9 +79,9 @@ int main(int argc, char** argv)
               {
                 ROS_DEBUG("seems to be a real data package: long enough and found end characters");
                 //read input data here
-                int16_t pwmA = 0xff &(char)input[data_packet_start + 2];
-                int16_t pwmB = 0xff &(char)input[data_packet_start + 3];
-                ROS_INFO("read %d\t%d",pwmA,pwmB);
+                //int16_t pwmA = 0xff &(char)input[data_packet_start + 2];
+                //int16_t pwmB = 0xff &(char)input[data_packet_start + 3];
+                //ROS_INFO("read %d\t%d",pwmA,pwmB);
 
 
 

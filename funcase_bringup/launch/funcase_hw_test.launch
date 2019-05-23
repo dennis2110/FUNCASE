@@ -1,4 +1,4 @@
 <launch>
   <node name="funcase_hw_node" pkg="funcase_bringup" type="funcase_main"
-                respawn="false" output="screen" ns="/funcase" />
+                respawn="false" output="screen" ns="/funcasebot" />
 </launch>

@@ -15,7 +15,7 @@ void ArduSerial::init(){
   serial::Timeout to = serial::Timeout::simpleTimeout(1000);
   _ser.setTimeout(to);
   _ser.open();
-  ROS_INFO("arduserial init");
+  ROS_INFO("arduserial init port: %s",_port.c_str());
 }
 
 /*void ArduSerial::read(){
@@ -98,8 +98,10 @@ void ArduSerial::read(uint8_t *data, size_t size){
             _read = _ser.read(_ser.available());
             ROS_DEBUG("read %i new characters from serial port, adding to %i characters of old input.", (int)_read.size(), (int)_input.size());
             _input += _read;
+            //ROS_INFO("in _ser.available");
             while (_input.length() >= size) // while there might be a complete package in input
             {
+              //ROS_INFO("in while");
               //parse for data packets
               data_packet_start = _input.find("$\x03");
               if (data_packet_start != std::string::npos)
@@ -276,6 +278,9 @@ void ArduSerial::read(uint8_t *data, size_t size){
 }*/
 
 void ArduSerial::write(uint8_t *data, size_t size){
-  int size_write = _ser.write(data, size);
-  std::cout << "write: " << size_write <<std::endl;
+  if(_ser.isOpen()){
+    size_t size_write = _ser.write(data, size);
+    ROS_INFO("write data to arduino : %s",_ser.getPort().c_str());
+    //std::cout << "write: " << size_write <<std::endl;
+  }
 }

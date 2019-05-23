@@ -19,8 +19,8 @@ int main(int argc, char** argv){
 
   ros::Time ts = ros::Time::now();
 
-  ros::Rate rate(50);
-  //ros::Rate r(1.0 / robot.getPeriod().toSec());
+  //ros::Rate rate(200);
+  ros::Rate rate(1.0 / robot.getPeriod().toSec());
   while (ros::ok())
   {
      ros::Duration d = ros::Time::now() - ts;
