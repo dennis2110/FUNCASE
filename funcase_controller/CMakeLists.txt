@@ -14,6 +14,8 @@ find_package(catkin REQUIRED COMPONENTS
   trajectory_msgs
 )
 
+
+
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
 
@@ -105,7 +107,7 @@ find_package(catkin REQUIRED COMPONENTS
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
 #  INCLUDE_DIRS include
-#  LIBRARIES funcase_controller
+  LIBRARIES ${PROJECT_NAME}
   CATKIN_DEPENDS control_msgs controller_interface dynamic_reconfigure trajectory_msgs
 #  DEPENDS system_lib
 )
@@ -117,12 +119,12 @@ catkin_package(
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
 include_directories(
-  include
   ${catkin_INCLUDE_DIRS}
+  include
 )
 
 ## Declare a C++ library
- add_library(${PROJECT_NAME}
+ add_library(funcase_controllers
    src/track_line_controller.cpp
 #  src/${PROJECT_NAME}/funcase_controller.cpp
  )
@@ -147,12 +149,12 @@ include_directories(
 ## same as for the library above
 # add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
-#add_dependencies(funcase_controllers ${PROJECT_NAME}_gencfg)
+add_dependencies(funcase_controllers ${PROJECT_NAME}_gencfg)
 
 ## Specify libraries to link a library or executable target against
- #target_link_libraries(${PROJECT_NAME}
- #  ${catkin_LIBRARIES}
- #)
+# target_link_libraries(${PROJECT_NAME}
+#   ${catkin_LIBRARIES}
+# )
 
 #############
 ## Install ##
@@ -169,18 +171,18 @@ include_directories(
 # )
 
 ## Mark executables and/or libraries for installation
-# install(TARGETS ${PROJECT_NAME} ${PROJECT_NAME}_node
-#   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-#   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-#   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-# )
+## install(TARGETS ${PROJECT_NAME}
+##   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+##   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+##   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+## )
 
 ## Mark cpp header files for installation
-# install(DIRECTORY include/${PROJECT_NAME}/
-#   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
+## install(DIRECTORY include/${PROJECT_NAME}/
+##  DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
 #   FILES_MATCHING PATTERN "*.h"
 #   PATTERN ".svn" EXCLUDE
-# )
+## )
 
 ## Mark other files for installation (e.g. launch and bag files, etc.)
 # install(FILES
