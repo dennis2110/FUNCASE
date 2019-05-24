@@ -61,4 +61,6 @@ funcasebot:
 
   track_line_controller:
     type: funcase_controllers/TrackLineController
-
+    wheels:
+      - base_left_wheel_joint
+      - base_right_wheel_joint

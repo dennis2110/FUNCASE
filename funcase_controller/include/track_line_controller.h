@@ -37,9 +37,9 @@ namespace funcase_controllers
     hardware_interface::JointHandle m_left_wheel;
     hardware_interface::JointHandle m_right_wheel;
     //for joint state
-    hardware_interface::JointStateInterface* m_turtle_state;
-    hardware_interface::JointStateHandle m_l_turtle_state;
-    hardware_interface::JointStateHandle m_r_turtle_state;
+    hardware_interface::JointStateInterface* m_funcase_state;
+    hardware_interface::JointStateHandle m_l_funcase_state;
+    hardware_interface::JointStateHandle m_r_funcase_state;
 
 
   private:
