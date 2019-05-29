@@ -9,7 +9,7 @@ void setup() {
   Serial.begin(115200);
   while(!Serial);
   Serial.setTimeout(10);
-/////////////////////////////////
+/////////////////////////////////ros
   
 ////////////cny70////////////////
   pinMode(A0,INPUT);

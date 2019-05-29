@@ -64,3 +64,9 @@ funcasebot:
     wheels:
       - base_left_wheel_joint
       - base_right_wheel_joint
+
+  move_it_controller:
+    type: funcase_controllers/MoveItController
+    wheels:
+      - base_left_wheel_joint
+      - base_right_wheel_joint

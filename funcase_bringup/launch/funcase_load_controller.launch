@@ -1,10 +1,14 @@
 <launch>
+  <node name="funcase_hw_node" pkg="funcase_bringup" type="funcase_main"
+                respawn="false" output="screen" ns="/funcasebot" />
+
   <!-- Load joint controller configurations from YAML file to parameter server -->
   <rosparam file="$(find funcase_bringup)/config/funcase_control.yaml" command="load"/>
 
   <!-- load the controllers -->
   <node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false"
-      output="screen" ns="/funcasebot" args="--stopped joint_state_controller track_line_controller imu_sensor_controller diffDrv"/>
+      output="screen" ns="/funcasebot" args="--stopped joint_state_controller track_line_controller
+                                            imu_sensor_controller diffDrv move_it_controller"/>
 
   <!-- convert joint states to TF transforms for rviz, etc
   <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"

@@ -13,16 +13,32 @@ bool funcase_controllers::TrackLineController::init(hardware_interface::EffortJo
   m_node = node;
   m_robot = robot;
 
+  //init PID controller
+  initspeed = 90;
+  error_back = 0;
+  Kp = 0.4;
+  Ki = 0;
+  Kd = 0;
+
   // read the parameter at parameter server and registe to class
   if(!read_parameter()) return false;
 
-  track_sensor_sub = m_node.subscribe<std_msgs::UInt8MultiArray>("/track_line_sensor",1, &funcase_controllers::TrackLineController::setCommandCB, this);
+  track_sensor_sub = m_node.subscribe<std_msgs::UInt8MultiArray>("/track_line_sensor",1, &TrackLineController::setCommandCB, this);
 
   return true;
 }
 
 void funcase_controllers::TrackLineController::update(const ros::Time &time, const ros::Duration &period){
   ROS_INFO("controller get sensor : %d %d %d %d",sensor_data[0],sensor_data[1],sensor_data[2],sensor_data[3]);
+  error = sensor_data[0] * 2 + sensor_data[1] - sensor_data[2] - sensor_data[3] * 2;
+  error_sum += error;
+  error_dot = error_back - error;
+  error_back= error;
+
+  turn = Kp*static_cast<double>(error);
+
+  m_left_wheel.setCommand(initspeed-turn);
+  m_right_wheel.setCommand(initspeed+turn);
 }
 
 void funcase_controllers::TrackLineController::starting(const ros::Time &time){
