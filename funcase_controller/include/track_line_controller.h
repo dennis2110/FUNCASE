@@ -11,6 +11,9 @@
 #include <std_msgs/UInt8MultiArray.h>
 #include <boost/scoped_ptr.hpp>
 
+#include <dynamic_reconfigure/server.h>
+#include "funcase_controllers/TrackLinePIDparamConfig.h"
+
 namespace funcase_controllers
 {
   class TrackLineController : public controller_interface::
@@ -29,6 +32,8 @@ namespace funcase_controllers
     bool read_parameter();
     void setCommand(uint8_t sensor1,uint8_t sensor2,uint8_t sensor3,uint8_t sensor4);
     void setCommandCB(const std_msgs::UInt8MultiArrayConstPtr& sensor_msg);
+    void callback_reconfigure(funcase_controller::TrackLinePIDparamConfig& config, uint32_t level);
+
   public:
     // current node
     ros::NodeHandle m_node;
@@ -48,6 +53,9 @@ namespace funcase_controllers
     //track sensor sub
     ros::Subscriber track_sensor_sub;
 
+    //dynamic_param server
+    dynamic_reconfigure::Server<funcase_controller::TrackLinePIDparamConfig> m_server;
+
     uint8_t sensor_data[4];
 
     //param for PID
@@ -58,9 +66,9 @@ namespace funcase_controllers
 
     double initspeed;
     double turn;
-    double Kp;
-    double Ki;
-    double Kd;
+    double k_p;
+    double k_i;
+    double k_d;
 
 
   };

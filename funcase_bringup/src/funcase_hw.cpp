@@ -117,11 +117,19 @@ void FuncaseRobot::wheelcmd2writediff(double cmd,int n){
     writediff[n] = 0;
     writediff[n+1] = 3;
   }else if (cmd < 0) {
-    temp = static_cast<uint8_t>(-cmd);
+    if (cmd <-255){
+      temp = 255;
+    }else{
+      temp = static_cast<uint8_t>(-cmd);
+    }
     writediff[n] = temp;
     writediff[n+1] = 2;
   }else if (cmd > 0) {
-    temp = static_cast<uint8_t>(cmd);
+    if (cmd >255){
+      temp = 255;
+    }else{
+      temp = static_cast<uint8_t>(cmd);
+    }
     writediff[n] = temp;
     writediff[n+1] = 1;
   }

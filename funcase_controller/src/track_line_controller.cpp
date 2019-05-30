@@ -1,6 +1,7 @@
 #include "track_line_controller.h"
 
-funcase_controllers::TrackLineController::TrackLineController(){
+funcase_controllers::TrackLineController::TrackLineController() :
+  error_back(0), initspeed(90.0), k_p(0.4), k_i(0.0), k_d(0.0){
 
 }
 
@@ -13,12 +14,10 @@ bool funcase_controllers::TrackLineController::init(hardware_interface::EffortJo
   m_node = node;
   m_robot = robot;
 
-  //init PID controller
-  initspeed = 90;
-  error_back = 0;
-  Kp = 0.4;
-  Ki = 0;
-  Kd = 0;
+
+  dynamic_reconfigure::Server<funcase_controller::TrackLinePIDparamConfig>::CallbackType f;
+  f = boost::bind(&TrackLineController::callback_reconfigure, this, _1, _2);
+  m_server.setCallback(f);
 
   // read the parameter at parameter server and registe to class
   if(!read_parameter()) return false;
@@ -35,7 +34,7 @@ void funcase_controllers::TrackLineController::update(const ros::Time &time, con
   error_dot = error_back - error;
   error_back= error;
 
-  turn = Kp*static_cast<double>(error);
+  turn = (k_p)*static_cast<double>(error) + (k_i)*static_cast<double>(error_sum) + (k_d)*static_cast<double>(error_dot);
 
   m_left_wheel.setCommand(initspeed-turn);
   m_right_wheel.setCommand(initspeed+turn);
@@ -101,6 +100,14 @@ void funcase_controllers::TrackLineController::setCommand(uint8_t sensor1, uint8
 
 void funcase_controllers::TrackLineController::setCommandCB(const std_msgs::UInt8MultiArrayConstPtr &sensor_msg){
   setCommand(sensor_msg->data.at(0),sensor_msg->data.at(1),sensor_msg->data.at(2),sensor_msg->data.at(3));
+}
+
+void funcase_controllers::TrackLineController::callback_reconfigure(funcase_controller::TrackLinePIDparamConfig &config, uint32_t level){
+  ROS_INFO("Reconfigure Request:  kP = %f, ki = %f, kD = %f, initspeed = %f",config.k_p , config.k_i, config.k_d, config.initspeed);
+  k_p = config.k_p;
+  k_i = config.k_i;
+  k_d = config.k_d;
+  initspeed = config.initspeed;
 }
 
 PLUGINLIB_EXPORT_CLASS(funcase_controllers::TrackLineController, controller_interface::ControllerBase)

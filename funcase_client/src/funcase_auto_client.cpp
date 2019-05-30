@@ -57,7 +57,7 @@ int main(int argc, char **argv)
       }
       if(sensor_value[0]>150 && sensor_value[3]>150){
         is_call = false;
-        stage++;
+        //stage++;
       }
       break;
     case 1:
