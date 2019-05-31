@@ -14,10 +14,19 @@ bool funcase_controllers::TrackLineController::init(hardware_interface::EffortJo
   m_node = node;
   m_robot = robot;
 
+  // Initialize dynamic_reconfigure server
+  funcase_controller::TrackLinePIDparamConfig config;
+  config.k_p = 0.4;
+  config.k_i = 0.0;
+  config.k_d = 0.0;
+  config.initspeed = 100.0;
 
-  dynamic_reconfigure::Server<funcase_controller::TrackLinePIDparamConfig>::CallbackType f;
-  f = boost::bind(&TrackLineController::callback_reconfigure, this, _1, _2);
-  m_server.setCallback(f);
+  dyn_reconf_server_ = std::make_shared<ReconfigureServer>(m_node);
+  dyn_reconf_server_->updateConfig(config);
+  dyn_reconf_server_->setCallback(boost::bind(&TrackLineController::callback_reconfigure, this, _1, _2));
+  //dynamic_reconfigure::Server<funcase_controller::TrackLinePIDparamConfig>::CallbackType f;
+  //f = boost::bind(&TrackLineController::callback_reconfigure, this, _1, _2);
+  //m_server.setCallback(f);
 
   // read the parameter at parameter server and registe to class
   if(!read_parameter()) return false;
@@ -45,7 +54,11 @@ void funcase_controllers::TrackLineController::starting(const ros::Time &time){
 }
 
 void funcase_controllers::TrackLineController::stopping(const ros::Time &time){
-
+  const double vel = 0.0;
+  for (int i = 0; i<2; i++){
+    m_left_wheel.setCommand(vel);
+    m_right_wheel.setCommand(vel);
+  }
 }
 
 bool funcase_controllers::TrackLineController::read_parameter(){

@@ -4,6 +4,7 @@
 #include <controller_interface/controller.h>
 #include <hardware_interface/joint_command_interface.h>
 #include <pluginlib/class_list_macros.h>
+
 #include <realtime_tools/realtime_publisher.h>
 #include <realtime_tools/realtime_buffer.h>
 #include <control_msgs/JointControllerState.h>
@@ -19,6 +20,10 @@ namespace funcase_controllers
   class TrackLineController : public controller_interface::
                     Controller<hardware_interface::EffortJointInterface>
   {
+
+    //dynamic_param server
+    //dynamic_reconfigure::Server<funcase_controller::TrackLinePIDparamConfig> m_server;
+
   public:
     TrackLineController();
     ~TrackLineController();
@@ -34,6 +39,7 @@ namespace funcase_controllers
     void setCommandCB(const std_msgs::UInt8MultiArrayConstPtr& sensor_msg);
     void callback_reconfigure(funcase_controller::TrackLinePIDparamConfig& config, uint32_t level);
 
+
   public:
     // current node
     ros::NodeHandle m_node;
@@ -48,13 +54,14 @@ namespace funcase_controllers
 
 
   private:
+    /// Dynamic Reconfigure server
+    typedef dynamic_reconfigure::Server<funcase_controller::TrackLinePIDparamConfig> ReconfigureServer;
+    std::shared_ptr<ReconfigureServer> dyn_reconf_server_;
+
     hardware_interface::JointHandle joint_;
 
     //track sensor sub
     ros::Subscriber track_sensor_sub;
-
-    //dynamic_param server
-    dynamic_reconfigure::Server<funcase_controller::TrackLinePIDparamConfig> m_server;
 
     uint8_t sensor_data[4];
 
