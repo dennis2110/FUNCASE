@@ -46,6 +46,12 @@ private:
   double wheel_vel[2];
   double wheel_eff[2];
 
+  //arm param
+  double arm_cmd[5];
+  double arm_pos[5];
+  double arm_vel[5];
+  double arm_eff[5];
+
   uint8_t cny70[4];
   //SerialIMU serialimu;
   SerialDiff serialdiff;
