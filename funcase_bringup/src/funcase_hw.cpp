@@ -9,6 +9,7 @@ FuncaseRobot::FuncaseRobot() : /*serialimu("/dev/ttyUSB1",5),*/ serialdiff("/dev
   }
 
   // connect and register the joint state interface
+  //wheel
   hardware_interface::JointStateHandle state_handle_a(
         "base_left_wheel_joint", &wheel_pos[0], &wheel_vel[0], &wheel_eff[0]); //pos vel eff outputs of the state message...
   jnt_state_interface.registerHandle(state_handle_a);
@@ -17,13 +18,60 @@ FuncaseRobot::FuncaseRobot() : /*serialimu("/dev/ttyUSB1",5),*/ serialdiff("/dev
         "base_right_wheel_joint", &wheel_pos[1], &wheel_vel[1], &wheel_eff[1]); //pos vel eff outputs of the state message...
   jnt_state_interface.registerHandle(state_handle_b);
 
+  //arm
+  hardware_interface::JointStateHandle state_handle_right_arm_base(
+        "right_arm_base_link_joint", &arm_pos[0], &arm_vel[0], &arm_eff[0]);
+  jnt_state_interface.registerHandle(state_handle_right_arm_base);
 
-  hardware_interface::JointHandle cmd_handle_a(
-        jnt_state_interface.getHandle("base_left_wheel_joint"), &wheel_cmd[0]); //cmd is the commanded value depending on the controller.
-  hardware_interface::JointHandle cmd_handle_b(
-        jnt_state_interface.getHandle("base_right_wheel_joint"), &wheel_cmd[1]); //cmd is the commanded value depending on the controller.
+  hardware_interface::JointStateHandle state_handle_right_arm_2(
+        "right_arm_2_link_joint", &arm_pos[1], &arm_vel[1], &arm_eff[1]);
+  jnt_state_interface.registerHandle(state_handle_right_arm_2);
+
+  hardware_interface::JointStateHandle state_handle_right_arm_3(
+        "right_arm_3_link_joint", &arm_pos[2], &arm_vel[2], &arm_eff[2]);
+  jnt_state_interface.registerHandle(state_handle_right_arm_3);
+
+  hardware_interface::JointStateHandle state_handle_right_arm_4(
+        "right_arm_4_link_joint", &arm_pos[3], &arm_vel[3], &arm_eff[3]);
+  jnt_state_interface.registerHandle(state_handle_right_arm_4);
+
+  hardware_interface::JointStateHandle state_handle_right_arm_5(
+        "right_arm_5_link_joint", &arm_pos[4], &arm_vel[4], &arm_eff[4]);
+  jnt_state_interface.registerHandle(state_handle_right_arm_5);
+
   registerInterface(&jnt_state_interface);
 
+  // register thr joint command
+  //wheel -> connect and register the joint effort interface
+  hardware_interface::JointHandle cmd_handle_a(
+        jnt_state_interface.getHandle("base_left_wheel_joint"), &wheel_cmd[0]); //cmd is the commanded value depending on the controller.
+  jnt_eff_interface.registerHandle(cmd_handle_a);
+  hardware_interface::JointHandle cmd_handle_b(
+        jnt_state_interface.getHandle("base_right_wheel_joint"), &wheel_cmd[1]); //cmd is the commanded value depending on the controller.
+  jnt_eff_interface.registerHandle(cmd_handle_b);
+
+  registerInterface(&jnt_eff_interface);
+
+  //arm -> connect and register the joint position interface
+  hardware_interface::JointHandle pos_cmd_handle_right_arm_base(
+        jnt_state_interface.getHandle("right_arm_base_link_joint"), &arm_cmd[0]);
+  jnt_pos_interface.registerHandle(pos_cmd_handle_right_arm_base);
+  hardware_interface::JointHandle pos_cmd_handle_right_arm_2(
+        jnt_state_interface.getHandle("right_arm_2_link_joint"), &arm_cmd[1]);
+  jnt_pos_interface.registerHandle(pos_cmd_handle_right_arm_2);
+  hardware_interface::JointHandle pos_cmd_handle_right_arm_3(
+        jnt_state_interface.getHandle("right_arm_3_link_joint"), &arm_cmd[2]);
+  jnt_pos_interface.registerHandle(pos_cmd_handle_right_arm_3);
+  hardware_interface::JointHandle pos_cmd_handle_right_arm_4(
+        jnt_state_interface.getHandle("right_arm_4_link_joint"), &arm_cmd[3]);
+  jnt_pos_interface.registerHandle(pos_cmd_handle_right_arm_4);
+  hardware_interface::JointHandle pos_cmd_handle_right_arm_5(
+        jnt_state_interface.getHandle("right_arm_5_link_joint"), &arm_cmd[4]);
+  jnt_pos_interface.registerHandle(pos_cmd_handle_right_arm_5);
+
+  registerInterface(&jnt_pos_interface);
+
+  //imu -> connect and register the imu interface
   hardware_interface::ImuSensorHandle::Data data;
   data.name="ImuTest";
   data.frame_id="Imu";
@@ -34,32 +82,16 @@ FuncaseRobot::FuncaseRobot() : /*serialimu("/dev/ttyUSB1",5),*/ serialdiff("/dev
   data.linear_acceleration=linear_acceleration;
   data.linear_acceleration_covariance=linear_acceleration_covariance;
 
-
   orientation_covariance[0]=1;
   orientation_covariance[1]=2;
   orientation_covariance[2]=3;
   orientation_covariance[3]=4;
 
-
-
   hardware_interface::ImuSensorHandle sensor_handle_imu(data);
   imu_interface.registerHandle(sensor_handle_imu);
 
-
-  // connect and register the joint position interface
-  jnt_pos_interface.registerHandle(cmd_handle_a);
-  jnt_vel_interface.registerHandle(cmd_handle_a);
-  jnt_eff_interface.registerHandle(cmd_handle_a);
-
-  jnt_pos_interface.registerHandle(cmd_handle_b);
-  jnt_vel_interface.registerHandle(cmd_handle_b);
-  jnt_eff_interface.registerHandle(cmd_handle_b);
-
-
-  registerInterface(&jnt_pos_interface);
-  registerInterface(&jnt_vel_interface);
-  registerInterface(&jnt_eff_interface);
   registerInterface(&imu_interface);
+
 }
 
 FuncaseRobot::~FuncaseRobot(){

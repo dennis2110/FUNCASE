@@ -29,7 +29,8 @@ public:
 
 private:
   hardware_interface::JointStateInterface jnt_state_interface;
-  hardware_interface::VelocityJointInterface jnt_vel_interface;
+
+  //hardware_interface::VelocityJointInterface jnt_vel_interface;
   hardware_interface::PositionJointInterface jnt_pos_interface;
   hardware_interface::EffortJointInterface jnt_eff_interface;
   hardware_interface::ImuSensorInterface imu_interface;
