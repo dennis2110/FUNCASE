@@ -47,7 +47,7 @@ private:
   double wheel_eff[2];
 
   uint8_t cny70[4];
-  //SerialIMU serialimu;
+  SerialIMU serialimu;
   SerialDiff serialdiff;
 
   uint8_t writediff[5];

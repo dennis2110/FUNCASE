@@ -1,6 +1,6 @@
 #include "funcase_hw.h"
 
-FuncaseRobot::FuncaseRobot() : /*serialimu("/dev/ttyUSB1",5),*/ serialdiff("/dev/ttyUSB0",5){
+FuncaseRobot::FuncaseRobot() : serialimu("/dev/ttyUSB1",5), serialdiff("/dev/ttyUSB0",5){
   for (int i=0;i<2;i++) {
     wheel_cmd[i] = 0;
     wheel_eff[i] = 0;
@@ -77,11 +77,11 @@ void FuncaseRobot::init(ros::NodeHandle *node){
 }
 
 void FuncaseRobot::read(){
-  //serialimu.read();
+  serialimu.read();
   serialdiff.read();
-  //for(int i=0;i<4;i++){
-  //  orientation[i] = serialimu.orientation[i];
-  //}
+  for(int i=0;i<4;i++){
+    orientation[i] = serialimu.orientation[i];
+  }
 //  wheel_vel[0]= static_cast<double>(serialdiff.raw_diff[0]); //wheel_vel is PWM of wheel
 //  wheel_vel[1]= static_cast<double>(serialdiff.raw_diff[2]);
 //  wheel_eff[0]= static_cast<double>(serialdiff.raw_diff[1]); //wheel_eff is mode of wheel
@@ -90,7 +90,7 @@ void FuncaseRobot::read(){
   cny70[1] = serialdiff.raw_diff[1];
   cny70[2] = serialdiff.raw_diff[2];
   cny70[3] = serialdiff.raw_diff[3];
-  //ROS_INFO("read imu data: %4.3f %4.3f %4.3f %4.3f",orientation[0],orientation[1],orientation[2],orientation[3]);
+  ROS_INFO("read imu data: %4.3f %4.3f %4.3f %4.3f",orientation[0],orientation[1],orientation[2],orientation[3]);
   //ROS_INFO("read diff data: %4.1f %4.1f Mode: %1.1f %1.1f",wheel_vel[0],wheel_vel[1],wheel_eff[0],wheel_eff[1]);
   publish_sensor_data();
 }
