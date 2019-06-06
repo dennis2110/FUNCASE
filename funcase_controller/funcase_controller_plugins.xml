@@ -8,6 +8,14 @@
     </description>
   </class>
 
+  <class name="funcase_controllers/TrackWallController"
+    type="funcase_controllers::TrackWallController"
+    base_class_type="controller_interface::ControllerBase">
+    <description>
+      The Track Wall Controller expects an EffortJointInterface type of hardware interface.
+    </description>
+  </class>
+
   <class name="funcase_controllers/MoveItController"
     type="funcase_controllers::MoveItController"
     base_class_type="controller_interface::ControllerBase">
