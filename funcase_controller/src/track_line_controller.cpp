@@ -1,7 +1,7 @@
 #include "track_line_controller.h"
 
 funcase_controllers::TrackLineController::TrackLineController() :
-  error_back(0), initspeed(90.0), k_p(0.4), k_i(0.0), k_d(0.0){
+   error_sum(0), error_back(0), initspeed(90.0), k_p(0.4), k_i(0.0), k_d(0.0){
 
 }
 
@@ -109,6 +109,7 @@ void funcase_controllers::TrackLineController::setCommand(uint8_t sensor1, uint8
   sensor_data[1] = sensor2;
   sensor_data[2] = sensor3;
   sensor_data[3] = sensor4;
+  //ROS_INFO("sensor %d", sensor_data[3]);
 }
 
 void funcase_controllers::TrackLineController::setCommandCB(const std_msgs::UInt8MultiArrayConstPtr &sensor_msg){

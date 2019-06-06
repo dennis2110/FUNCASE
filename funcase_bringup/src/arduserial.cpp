@@ -280,7 +280,7 @@ void ArduSerial::read(uint8_t *data, size_t size){
 void ArduSerial::write(uint8_t *data, size_t size){
   if(_ser.isOpen()){
     size_t size_write = _ser.write(data, size);
-    ROS_INFO("write data to arduino : %s",_ser.getPort().c_str());
+    ///ROS_INFO("write data to arduino : %s",_ser.getPort().c_str());
     //std::cout << "write: " << size_write <<std::endl;
   }
 }

@@ -8,6 +8,11 @@
 #include <realtime_tools/realtime_buffer.h>
 #include <control_msgs/JointControllerState.h>
 
+#include <dynamic_reconfigure/server.h>
+#include "funcase_controllers/TrackWallPIDparamConfig.h"
+
+#include "sensor_msgs/LaserScan.h"
+
 namespace funcase_controllers
 {
   class TrackWallController : public controller_interface::
@@ -24,6 +29,8 @@ namespace funcase_controllers
 
   private:
     bool read_parameter();
+    void callback_reconfigure(funcase_controller::TrackWallPIDparamConfig& config, uint32_t level);
+    void setCommandCB(const sensor_msgs::LaserScanConstPtr& scan_msg);
 
   public:
     // current node
@@ -38,15 +45,21 @@ namespace funcase_controllers
     hardware_interface::JointStateHandle m_r_funcase_state;
 
   private:
+    /// Dynamic Reconfigure server
+    typedef dynamic_reconfigure::Server<funcase_controller::TrackWallPIDparamConfig> ReconfigureServer;
+    std::shared_ptr<ReconfigureServer> dyn_reconf_server_;
+
     hardware_interface::JointHandle joint_;
     //track lidar sub
     ros::Subscriber track_lidar_sub;
 
     //param for PID
-    int error;
-    int error_sum;
-    int error_dot;
-    int error_back;
+    float error;
+    float error_sum;
+    float error_dot;
+    float error_back;
+    float lidar_value[9];
+    float wallrange;
 
     double initspeed;
     double turn;
