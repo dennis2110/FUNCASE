@@ -31,7 +31,11 @@ void funcase_controllers::MoveItController::starting(const ros::Time &time){
 }
 
 void funcase_controllers::MoveItController::stopping(const ros::Time &time){
-
+  const double vel = 0.0;
+  for (int i = 0; i<2; i++){
+    m_left_wheel.setCommand(vel);
+    m_right_wheel.setCommand(vel);
+  }
 }
 
 bool funcase_controllers::MoveItController::read_parameter(){

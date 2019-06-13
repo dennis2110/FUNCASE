@@ -39,6 +39,7 @@ void funcase_controllers::TrackWallController::update(const ros::Time &time, con
     error += lidar_value[i];
   }
   error = error/9 - wallrange;
+  ROS_INFO("error = %f",static_cast<double>(error));
   error_sum += error;
   error_dot = error_back - error;
   error_back= error;
@@ -116,9 +117,9 @@ void funcase_controllers::TrackWallController::callback_reconfigure(funcase_cont
 void funcase_controllers::TrackWallController::setCommandCB(const sensor_msgs::LaserScanConstPtr &scan_msg){
 
   for(size_t i = 0;i<9;i++){
-    lidar_value[i] = scan_msg->ranges.at(i+176);
+    lidar_value[i] = scan_msg->ranges.at(i+535);
   }
-  ROS_INFO("wall data: %4.3f %4.3f %4.3f", scan_msg->ranges.at(3), scan_msg->ranges.at(4), scan_msg->ranges.at(360));
+  ROS_INFO("wall data: %4.3f %4.3f %4.3f", scan_msg->ranges.at(535), scan_msg->ranges.at(539), scan_msg->ranges.at(543));
 }
 
 PLUGINLIB_EXPORT_CLASS(funcase_controllers::TrackWallController, controller_interface::ControllerBase)

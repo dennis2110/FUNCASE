@@ -137,6 +137,8 @@ include_directories(
 add_executable(funcase_auto_client src/funcase_auto_client.cpp)
 target_link_libraries(funcase_auto_client ${catkin_LIBRARIES})
 
+add_executable(robotcontrol_auto_client src/robotcontrol_auto_client.cpp)
+target_link_libraries(robotcontrol_auto_client ${catkin_LIBRARIES})
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
