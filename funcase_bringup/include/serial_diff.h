@@ -3,6 +3,8 @@
 
 #include "arduserial.h"
 
+#define SENSOR_REG_COUNT (5)
+
 class SerialDiff : public ArduSerial{
 public:
   SerialDiff(std::string port, size_t length);
@@ -12,7 +14,7 @@ public:
 private:
 
 public:
-  uint8_t raw_diff[4];
+  uint8_t raw_diff[SENSOR_REG_COUNT];
 private:
 
 

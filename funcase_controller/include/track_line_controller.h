@@ -15,6 +15,8 @@
 #include <dynamic_reconfigure/server.h>
 #include "funcase_controllers/TrackLinePIDparamConfig.h"
 
+#define SENSOR_REG_COUNT (5)
+
 namespace funcase_controllers
 {
   class TrackLineController : public controller_interface::
@@ -35,7 +37,7 @@ namespace funcase_controllers
 
   private:
     bool read_parameter();
-    void setCommand(uint8_t sensor1,uint8_t sensor2,uint8_t sensor3,uint8_t sensor4);
+    void setCommand(uint8_t sensor1,uint8_t sensor2,uint8_t sensor3,uint8_t sensor4,uint8_t sensor5);
     void setCommandCB(const std_msgs::UInt8MultiArrayConstPtr& sensor_msg);
     void callback_reconfigure(funcase_controller::TrackLinePIDparamConfig& config, uint32_t level);
 
@@ -63,7 +65,7 @@ namespace funcase_controllers
     //track sensor sub
     ros::Subscriber track_sensor_sub;
 
-    uint8_t sensor_data[4];
+    uint8_t sensor_data[SENSOR_REG_COUNT];
 
     //param for PID
     int error;

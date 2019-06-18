@@ -10,6 +10,8 @@
 #include "serial_diff.h"
 #include <std_msgs/UInt8MultiArray.h>
 
+#define SENSOR_REG_COUNT (5)
+
 class FuncaseRobot : public hardware_interface::RobotHW
 {
 public:
@@ -46,7 +48,7 @@ private:
   double wheel_vel[2];
   double wheel_eff[2];
 
-  uint8_t cny70[4];
+  uint8_t cny70[SENSOR_REG_COUNT];
   //SerialIMU serialimu;
   SerialDiff serialdiff;
 

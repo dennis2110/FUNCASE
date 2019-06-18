@@ -3,13 +3,13 @@
 #define EN_L 9
 #define R1 7
 #define R2 6
-#define L1 5
-#define L2 4
+#define L1 4
+#define L2 5
 
 Motor motorR(EN_R, R1, R2);
 Motor motorL(EN_L, L1, L2);
 uint8_t readcmd[5];  
-uint8_t writecmd[8]={ '$', 0x03, 0,0,0,0, '\r','\n'};
+uint8_t writecmd[9]={ '$', 0x03, 0,0,0,0,0, '\r','\n'};
 int16_t MotorCMD[4]={0,0,0,0};
 
 void setup() {
@@ -22,6 +22,7 @@ void setup() {
 ////////////cny70////////////////
   pinMode(A0,INPUT);
   pinMode(A1,INPUT);
+  pinMode(A2,INPUT);
   pinMode(A3,INPUT);
   pinMode(A4,INPUT);
 /////////////////////////////////
@@ -96,8 +97,9 @@ void loop() {
 
   writecmd[2]= map(analogRead(A0),0,1023,0,255);
   writecmd[3]= map(analogRead(A1),0,1023,0,255);
-  writecmd[4]= map(analogRead(A3),0,1023,0,255);
-  writecmd[5]= map(analogRead(A4),0,1023,0,255);
-  Serial.write(writecmd, 8);
+  writecmd[4]= map(analogRead(A2),0,1023,0,255);
+  writecmd[5]= map(analogRead(A3),0,1023,0,255);
+  writecmd[6]= map(analogRead(A4),0,1023,0,255);
+  Serial.write(writecmd, 9);
 /////////////////////////////////
 }
