@@ -27,6 +27,7 @@ public:
 private:
   void wheelcmd2writediff(double cmd, int n);
   void publish_sensor_data();
+  uint8_t normalize(uint8_t value, uint8_t max, uint8_t min);
 public:
 
 private:
