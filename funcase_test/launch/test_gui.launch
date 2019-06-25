@@ -1,0 +1,4 @@
+<launch>
+  <node name="rqt_controller_manager" pkg="rqt_controller_manager" type="rqt_controller_manager"  required="false" output="screen" />
+  <node name="rqt_reconfigure" pkg="rqt_reconfigure" type="rqt_reconfigure"  required="false" output="screen" />
+</launch>

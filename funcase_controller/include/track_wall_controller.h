@@ -12,6 +12,21 @@
 #include "funcase_controllers/TrackWallPIDparamConfig.h"
 
 #include "sensor_msgs/LaserScan.h"
+#include "track_wall_fuzzy.h"
+
+#define HOUGH_TRANSFORM
+
+#ifdef USE_YDLIDAR
+  #define laser_sample_num 720
+  #define laser_start      159
+  #define laser_end        201
+  #define laser_range_min  0.1
+#else
+  #define laser_sample_num 360
+  #define laser_start      249
+  #define laser_end        291
+  #define laser_range_min  0.12
+#endif
 
 namespace funcase_controllers
 {
@@ -31,6 +46,7 @@ namespace funcase_controllers
     bool read_parameter();
     void callback_reconfigure(funcase_controller::TrackWallPIDparamConfig& config, uint32_t level);
     void setCommandCB(const sensor_msgs::LaserScanConstPtr& scan_msg);
+    void hough_transform(float ave_laser[], float &_r_save, float& _angle_save);
 
   public:
     // current node
@@ -54,11 +70,18 @@ namespace funcase_controllers
     ros::Subscriber track_lidar_sub;
 
     //param for PID
-    float error;
+    float error_angle;
+    float error_range;
+
     float error_sum;
     float error_dot;
     float error_back;
-    float lidar_value[9];
+    float lidar_value[43];
+    float x[43];
+    float y[43];
+    float r_save;
+    float angle_save;
+    float wallangle;
     float wallrange;
 
     double initspeed;
@@ -66,6 +89,8 @@ namespace funcase_controllers
     double k_p;
     double k_i;
     double k_d;
+
+    FuzzyCountrol wallfuzzy;
   };
 }
 

@@ -1,6 +1,6 @@
 #include "funcase_hw.h"
 
-FuncaseRobot::FuncaseRobot() : /*serialimu("/dev/ttyUSB1",5),*/ serialdiff("/dev/ttyUSB0",5){
+FuncaseRobot::FuncaseRobot() : /*serialimu("/dev/mpu6050",5),*/ serialdiff("/dev/chassis",5){
   // init param
   for (int i=0;i<2;i++) {
     wheel_cmd[i] = 0;
@@ -131,18 +131,25 @@ void FuncaseRobot::wheelcmd2writediff(double cmd,int n){
 
 void FuncaseRobot::publish_sensor_data(){
   std_msgs::UInt8MultiArray sensor_msg;
+#ifdef NORMALIZE_CNY70
   sensor_msg.data.push_back(normalize(cny70[0], 237, 10));
   sensor_msg.data.push_back(normalize(cny70[1], 234, 10));
   sensor_msg.data.push_back(normalize(cny70[2], 233, 10));
   sensor_msg.data.push_back(normalize(cny70[3], 230, 10));
   sensor_msg.data.push_back(normalize(cny70[4], 235, 10));
-
-  /*for (int i=0;i<SENSOR_REG_COUNT;i++) {
-    sensor_msg.data.push_back(normalize(cny70[i], , );
-  }*/
+#else
+  for (int i=0;i<SENSOR_REG_COUNT;i++) {
+    sensor_msg.data.push_back(cny70[i]);
+  }
+#endif
   m_track_line_pub.publish(sensor_msg);
 }
 
 uint8_t FuncaseRobot::normalize(uint8_t value, uint8_t max, uint8_t min){
-  return static_cast<uint8_t>((value - min)/(max - min)*255);
+  float num = static_cast<float>(value - min )/static_cast<float>(max -  min)*255;
+  if(num > 255)
+    num = 255.0;
+  else if(num < 0)
+    num = 0.0;
+  return static_cast<uint8_t>(num);
 }
