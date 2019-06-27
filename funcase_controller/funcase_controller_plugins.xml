@@ -24,4 +24,12 @@
     </description>
   </class>
 
+  <class name="funcase_controllers/ArmController"
+    type="funcase_controllers::ArmController"
+    base_class_type="controller_interface::ControllerBase">
+    <description>
+      for remote / The Arm Controller expects an PositionJointInterface type of hardware interface.
+    </description>
+  </class>
+
 </library>

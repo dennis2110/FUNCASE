@@ -42,8 +42,10 @@ funcasebot:
 #    # Base frame_id
 #    base_frame_id: base_footprint #default: base_link
 #
+
 #    # Velocity and acceleration limits
 #    # Whenever a min_* is unspecified, default to -max_*
+
 #    linear:
 #      x:
 #        has_velocity_limits    : true
@@ -76,3 +78,17 @@ funcasebot:
     wheels:
       - base_left_wheel_joint
       - base_right_wheel_joint
+
+  arm_controller:
+    type: funcase_controllers/ArmController
+    right_arm:
+      - right_arm_base_link_joint
+      - right_arm_2_link_joint
+      - right_arm_3_link_joint
+      - right_arm_4_link_joint
+      - right_arm_5_link_joint
+    left_arm:
+      - left_arm_base_link_joint
+      - left_arm_2_link_joint
+      - left_arm_3_link_joint
+      - left_arm_4_link_joint

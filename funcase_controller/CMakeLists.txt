@@ -131,6 +131,7 @@ include_directories(
    src/track_line_controller.cpp
    src/track_wall_controller.cpp
    src/move_it_controller.cpp
+   src/arm_controller.cpp
 #  src/${PROJECT_NAME}/funcase_controller.cpp
  )
 

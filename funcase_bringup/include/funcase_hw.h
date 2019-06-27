@@ -8,6 +8,7 @@
 #include <iostream>
 #include "serial_imu.h"
 #include "serial_diff.h"
+#include "serial_arm.h"
 #include <std_msgs/UInt8MultiArray.h>
 
 #define NORMALIZE_CNY70
@@ -27,13 +28,15 @@ public:
   void write();
 private:
   void wheelcmd2writediff(double cmd, int n);
+  void armcmd2writearm(double* r_cmd, double* l_cmd);
   void publish_sensor_data();
   uint8_t normalize(uint8_t value, uint8_t max, uint8_t min);
 public:
 
 private:
   hardware_interface::JointStateInterface jnt_state_interface;
-  hardware_interface::VelocityJointInterface jnt_vel_interface;
+
+  //hardware_interface::VelocityJointInterface jnt_vel_interface;
   hardware_interface::PositionJointInterface jnt_pos_interface;
   hardware_interface::EffortJointInterface jnt_eff_interface;
   hardware_interface::ImuSensorInterface imu_interface;
@@ -50,11 +53,26 @@ private:
   double wheel_vel[2];
   double wheel_eff[2];
 
+  //arm param
+  double r_arm_cmd[5];
+  double r_arm_pos[5];
+  double r_arm_vel[5];
+  double r_arm_eff[5];
+
+  double l_arm_cmd[4];
+  double l_arm_pos[4];
+  double l_arm_vel[4];
+  double l_arm_eff[4];
+
+  uint8_t readarm[1];
   uint8_t cny70[SENSOR_REG_COUNT];
+
   //SerialIMU serialimu;
   SerialDiff serialdiff;
+  SerialArm serialarm;
 
   uint8_t writediff[5];
+  uint8_t writearm[17];
 
   // Publisher who publish the Tracking line sensor
   ros::Publisher m_track_line_pub;
