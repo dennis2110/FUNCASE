@@ -146,7 +146,8 @@ add_executable(funcase_main src/funcase_main.cpp
                             src/funcase_hw.cpp
                             src/arduserial.cpp
                             src/serial_imu.cpp
-                            src/serial_diff.cpp)
+                            src/serial_diff.cpp
+                            src/serial_arm.cpp)
 
 add_dependencies(funcase_main ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 

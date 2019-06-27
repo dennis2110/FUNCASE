@@ -8,6 +8,7 @@
 #include <iostream>
 #include "serial_imu.h"
 #include "serial_diff.h"
+#include "serial_arm.h"
 #include <std_msgs/UInt8MultiArray.h>
 
 class FuncaseRobot : public hardware_interface::RobotHW
@@ -24,6 +25,7 @@ public:
   void write();
 private:
   void wheelcmd2writediff(double cmd, int n);
+  void armcmd2writearm(double* r_cmd, double* l_cmd);
   void publish_sensor_data();
 public:
 
@@ -48,16 +50,24 @@ private:
   double wheel_eff[2];
 
   //arm param
-  double arm_cmd[5];
-  double arm_pos[5];
-  double arm_vel[5];
-  double arm_eff[5];
+  double r_arm_cmd[5];
+  double r_arm_pos[5];
+  double r_arm_vel[5];
+  double r_arm_eff[5];
+
+  double l_arm_cmd[4];
+  double l_arm_pos[4];
+  double l_arm_vel[4];
+  double l_arm_eff[4];
 
   uint8_t cny70[4];
+  uint8_t readarm[1];
   //SerialIMU serialimu;
-  SerialDiff serialdiff;
+  //SerialDiff serialdiff;
+  SerialArm serialarm;
 
   uint8_t writediff[5];
+  uint8_t writearm[17];
 
   // Publisher who publish the Tracking line sensor
   ros::Publisher m_track_line_pub;

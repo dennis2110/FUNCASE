@@ -1,6 +1,6 @@
 #include "funcase_hw.h"
 
-FuncaseRobot::FuncaseRobot() : /*serialimu("/dev/ttyUSB1",5),*/ serialdiff("/dev/ttyUSB0",5){
+FuncaseRobot::FuncaseRobot() : /*serialimu("/dev/ttyUSB1",5),*/ /*serialdiff("/dev/ttyUSB0",5)*/ serialarm("/dev/ttyACM0",5){
   for (int i=0;i<2;i++) {
     wheel_cmd[i] = 0;
     wheel_eff[i] = 0;
@@ -18,26 +18,43 @@ FuncaseRobot::FuncaseRobot() : /*serialimu("/dev/ttyUSB1",5),*/ serialdiff("/dev
         "base_right_wheel_joint", &wheel_pos[1], &wheel_vel[1], &wheel_eff[1]); //pos vel eff outputs of the state message...
   jnt_state_interface.registerHandle(state_handle_b);
 
-  //arm
+  //arm right
   hardware_interface::JointStateHandle state_handle_right_arm_base(
-        "right_arm_base_link_joint", &arm_pos[0], &arm_vel[0], &arm_eff[0]);
+        "right_arm_base_link_joint", &r_arm_pos[0], &r_arm_vel[0], &r_arm_eff[0]);
   jnt_state_interface.registerHandle(state_handle_right_arm_base);
 
   hardware_interface::JointStateHandle state_handle_right_arm_2(
-        "right_arm_2_link_joint", &arm_pos[1], &arm_vel[1], &arm_eff[1]);
+        "right_arm_2_link_joint", &r_arm_pos[1], &r_arm_vel[1], &r_arm_eff[1]);
   jnt_state_interface.registerHandle(state_handle_right_arm_2);
 
   hardware_interface::JointStateHandle state_handle_right_arm_3(
-        "right_arm_3_link_joint", &arm_pos[2], &arm_vel[2], &arm_eff[2]);
+        "right_arm_3_link_joint", &r_arm_pos[2], &r_arm_vel[2], &r_arm_eff[2]);
   jnt_state_interface.registerHandle(state_handle_right_arm_3);
 
   hardware_interface::JointStateHandle state_handle_right_arm_4(
-        "right_arm_4_link_joint", &arm_pos[3], &arm_vel[3], &arm_eff[3]);
+        "right_arm_4_link_joint", &r_arm_pos[3], &r_arm_vel[3], &r_arm_eff[3]);
   jnt_state_interface.registerHandle(state_handle_right_arm_4);
 
   hardware_interface::JointStateHandle state_handle_right_arm_5(
-        "right_arm_5_link_joint", &arm_pos[4], &arm_vel[4], &arm_eff[4]);
+        "right_arm_5_link_joint", &r_arm_pos[4], &r_arm_vel[4], &r_arm_eff[4]);
   jnt_state_interface.registerHandle(state_handle_right_arm_5);
+
+  //arm left
+  hardware_interface::JointStateHandle state_handle_left_arm_base(
+        "left_arm_base_link_joint", &l_arm_pos[0], &l_arm_vel[0], &l_arm_eff[0]);
+  jnt_state_interface.registerHandle(state_handle_left_arm_base);
+
+  hardware_interface::JointStateHandle state_handle_left_arm_2(
+        "left_arm_2_link_joint", &l_arm_pos[1], &l_arm_vel[1], &l_arm_eff[1]);
+  jnt_state_interface.registerHandle(state_handle_left_arm_2);
+
+  hardware_interface::JointStateHandle state_handle_left_arm_3(
+        "left_arm_3_link_joint", &l_arm_pos[2], &l_arm_vel[2], &l_arm_eff[2]);
+  jnt_state_interface.registerHandle(state_handle_left_arm_3);
+
+  hardware_interface::JointStateHandle state_handle_left_arm_4(
+        "left_arm_4_link_joint", &l_arm_pos[3], &l_arm_vel[3], &l_arm_eff[3]);
+  jnt_state_interface.registerHandle(state_handle_left_arm_4);
 
   registerInterface(&jnt_state_interface);
 
@@ -54,20 +71,33 @@ FuncaseRobot::FuncaseRobot() : /*serialimu("/dev/ttyUSB1",5),*/ serialdiff("/dev
 
   //arm -> connect and register the joint position interface
   hardware_interface::JointHandle pos_cmd_handle_right_arm_base(
-        jnt_state_interface.getHandle("right_arm_base_link_joint"), &arm_cmd[0]);
+        jnt_state_interface.getHandle("right_arm_base_link_joint"), &r_arm_cmd[0]);
   jnt_pos_interface.registerHandle(pos_cmd_handle_right_arm_base);
   hardware_interface::JointHandle pos_cmd_handle_right_arm_2(
-        jnt_state_interface.getHandle("right_arm_2_link_joint"), &arm_cmd[1]);
+        jnt_state_interface.getHandle("right_arm_2_link_joint"), &r_arm_cmd[1]);
   jnt_pos_interface.registerHandle(pos_cmd_handle_right_arm_2);
   hardware_interface::JointHandle pos_cmd_handle_right_arm_3(
-        jnt_state_interface.getHandle("right_arm_3_link_joint"), &arm_cmd[2]);
+        jnt_state_interface.getHandle("right_arm_3_link_joint"), &r_arm_cmd[2]);
   jnt_pos_interface.registerHandle(pos_cmd_handle_right_arm_3);
   hardware_interface::JointHandle pos_cmd_handle_right_arm_4(
-        jnt_state_interface.getHandle("right_arm_4_link_joint"), &arm_cmd[3]);
+        jnt_state_interface.getHandle("right_arm_4_link_joint"), &r_arm_cmd[3]);
   jnt_pos_interface.registerHandle(pos_cmd_handle_right_arm_4);
   hardware_interface::JointHandle pos_cmd_handle_right_arm_5(
-        jnt_state_interface.getHandle("right_arm_5_link_joint"), &arm_cmd[4]);
+        jnt_state_interface.getHandle("right_arm_5_link_joint"), &r_arm_cmd[4]);
   jnt_pos_interface.registerHandle(pos_cmd_handle_right_arm_5);
+  //arm left
+  hardware_interface::JointHandle pos_cmd_handle_left_arm_base(
+        jnt_state_interface.getHandle("left_arm_base_link_joint"), &l_arm_cmd[0]);
+  jnt_pos_interface.registerHandle(pos_cmd_handle_left_arm_base);
+  hardware_interface::JointHandle pos_cmd_handle_left_arm_2(
+        jnt_state_interface.getHandle("left_arm_2_link_joint"), &l_arm_cmd[1]);
+  jnt_pos_interface.registerHandle(pos_cmd_handle_left_arm_2);
+  hardware_interface::JointHandle pos_cmd_handle_left_arm_3(
+        jnt_state_interface.getHandle("left_arm_3_link_joint"), &l_arm_cmd[2]);
+  jnt_pos_interface.registerHandle(pos_cmd_handle_left_arm_3);
+  hardware_interface::JointHandle pos_cmd_handle_left_arm_4(
+        jnt_state_interface.getHandle("left_arm_4_link_joint"), &l_arm_cmd[3]);
+  jnt_pos_interface.registerHandle(pos_cmd_handle_left_arm_4);
 
   registerInterface(&jnt_pos_interface);
 
@@ -109,38 +139,25 @@ void FuncaseRobot::init(ros::NodeHandle *node){
 }
 
 void FuncaseRobot::read(){
-  //serialimu.read();
-  serialdiff.read();
-  //for(int i=0;i<4;i++){
-  //  orientation[i] = serialimu.orientation[i];
-  //}
-//  wheel_vel[0]= static_cast<double>(serialdiff.raw_diff[0]); //wheel_vel is PWM of wheel
-//  wheel_vel[1]= static_cast<double>(serialdiff.raw_diff[2]);
-//  wheel_eff[0]= static_cast<double>(serialdiff.raw_diff[1]); //wheel_eff is mode of wheel
-//  wheel_eff[1]= static_cast<double>(serialdiff.raw_diff[3]);
-  cny70[0] = serialdiff.raw_diff[0];
-  cny70[1] = serialdiff.raw_diff[1];
-  cny70[2] = serialdiff.raw_diff[2];
-  cny70[3] = serialdiff.raw_diff[3];
+  serialarm.read();
+  readarm[0] = serialarm.raw_arm[0];
+//  serialdiff.read();
+
+//  cny70[0] = serialdiff.raw_diff[0];
+//  cny70[1] = serialdiff.raw_diff[1];
+//  cny70[2] = serialdiff.raw_diff[2];
+//  cny70[3] = serialdiff.raw_diff[3];
   //ROS_INFO("read imu data: %4.3f %4.3f %4.3f %4.3f",orientation[0],orientation[1],orientation[2],orientation[3]);
-  //ROS_INFO("read diff data: %4.1f %4.1f Mode: %1.1f %1.1f",wheel_vel[0],wheel_vel[1],wheel_eff[0],wheel_eff[1]);
-  publish_sensor_data();
+  ROS_INFO("read arm data: %0.d",readarm[0]);
+//  publish_sensor_data();
 }
 
 void FuncaseRobot::write(){
-  //wheel_cmd[0] = 50;
-  //wheel_cmd[1] = -120;
-  ROS_INFO("diff data: %03d %03d %03d %03d",writediff[0],writediff[1],writediff[2],writediff[3]);
-  wheelcmd2writediff(wheel_cmd[0],0); //set writediff[0 and 1] from wheel_cmd[0]
-  wheelcmd2writediff(wheel_cmd[1],2); //set writediff[2 and 3] from wheel_cmd[0]
 
-  /*writediff[0] = 50;//static_cast<uint8_t>(wheel_cmd[0]);
-  writediff[1] = 1;
-  writediff[2] = 213;
-  writediff[3] = 1;*/
-
-  serialdiff.write(writediff,5);
-  ROS_INFO("write diff data: %03d %03d %03d %03d",writediff[0],writediff[1],writediff[2],writediff[3]);
+  armcmd2writearm(r_arm_cmd, l_arm_cmd);
+  serialarm.write(writearm, 17);
+  ROS_INFO("write right arm data: %03d %03d %03d %03d %03d",writearm[0],writearm[2],writearm[4],writearm[6],writearm[8]);
+  ROS_INFO("write left arm data: %03d %03d %03d %03d",writearm[10],writearm[12],writearm[14],writearm[16]);
 }
 
 void FuncaseRobot::wheelcmd2writediff(double cmd,int n){
@@ -164,6 +181,18 @@ void FuncaseRobot::wheelcmd2writediff(double cmd,int n){
     }
     writediff[n] = temp;
     writediff[n+1] = 1;
+  }
+}
+
+void FuncaseRobot::armcmd2writearm(double* r_cmd, double* l_cmd){
+  for (int i=1;i<16;i+=2) {
+    writearm[i]=0;
+  }
+  for(int i=0;i<5;i++){
+    writearm[i*2] = static_cast<uint8_t>(r_cmd[i]);
+  }
+  for(int i=0;i<4;i++){
+    writearm[i*2+10] = static_cast<uint8_t>(l_cmd[i]);
   }
 }
 

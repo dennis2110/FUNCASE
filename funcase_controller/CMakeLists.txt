@@ -129,6 +129,7 @@ include_directories(
  add_library(${PROJECT_NAME}
    src/track_line_controller.cpp
    src/move_it_controller.cpp
+   src/arm_controller.cpp
 #  src/${PROJECT_NAME}/funcase_controller.cpp
  )
 
