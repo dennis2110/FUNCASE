@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(funcase_client)
+project(funcase_remote)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
 # add_compile_options(-std=c++11)
@@ -9,8 +9,9 @@ project(funcase_client)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
   roscpp
+  rospy
+  sensor_msgs
   std_msgs
-  funcase_msgs
 )
 
 ## System dependencies are found with CMake's conventions
@@ -70,7 +71,7 @@ find_package(catkin REQUIRED COMPONENTS
 ## Generate added messages and services with any dependencies listed here
 # generate_messages(
 #   DEPENDENCIES
-#   std_msgs
+#   sensor_msgs#   std_msgs
 # )
 
 ################################################
@@ -104,8 +105,8 @@ find_package(catkin REQUIRED COMPONENTS
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
 #  INCLUDE_DIRS include
-#  LIBRARIES funcase_client
-#  CATKIN_DEPENDS roscpp std_msgs
+#  LIBRARIES funcase_remote
+#  CATKIN_DEPENDS roscpp rospy sensor_msgs std_msgs
 #  DEPENDS system_lib
 )
 
@@ -122,7 +123,7 @@ include_directories(
 
 ## Declare a C++ library
 # add_library(${PROJECT_NAME}
-#   src/${PROJECT_NAME}/funcase_client.cpp
+#   src/${PROJECT_NAME}/funcase_remote.cpp
 # )
 
 ## Add cmake target dependencies of the library
@@ -133,19 +134,7 @@ include_directories(
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
-# add_executable(${PROJECT_NAME}_node src/funcase_client_node.cpp)
-
-add_executable(funcase_auto_client src/funcase_auto_client.cpp)
-target_link_libraries(funcase_auto_client ${catkin_LIBRARIES})
-
-add_executable(robotcontrol_auto_client src/robotcontrol_auto_client.cpp)
-target_link_libraries(robotcontrol_auto_client ${catkin_LIBRARIES})
-
-add_executable(robotcontrol_test_stage src/robotcontrol_test_stage.cpp)
-target_link_libraries(robotcontrol_test_stage ${catkin_LIBRARIES})
-
-add_executable(funcase_remoterobot_client src/funcase_remoterobot_client.cpp)
-target_link_libraries(funcase_remoterobot_client ${catkin_LIBRARIES})
+# add_executable(${PROJECT_NAME}_node src/funcase_remote_node.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -202,7 +191,7 @@ target_link_libraries(funcase_remoterobot_client ${catkin_LIBRARIES})
 #############
 
 ## Add gtest based cpp test target and link libraries
-# catkin_add_gtest(${PROJECT_NAME}-test test/test_funcase_client.cpp)
+# catkin_add_gtest(${PROJECT_NAME}-test test/test_funcase_remote.cpp)
 # if(TARGET ${PROJECT_NAME}-test)
 #   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
 # endif()
