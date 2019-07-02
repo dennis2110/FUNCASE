@@ -10,8 +10,8 @@
 #include "serial_diff.h"
 #include <std_msgs/UInt8MultiArray.h>
 
-#define NORMALIZE_CNY70
-#define SENSOR_REG_COUNT (5)
+//#define NORMALIZE_CNY70
+#define SENSOR_REG_COUNT (9)
 
 class FuncaseRobot : public hardware_interface::RobotHW
 {

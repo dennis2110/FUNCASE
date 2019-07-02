@@ -3,7 +3,7 @@
 
 #include "arduserial.h"
 
-#define SENSOR_REG_COUNT (5)
+#define SENSOR_REG_COUNT (9)
 
 class SerialDiff : public ArduSerial{
 public:

@@ -1,0 +1,3 @@
+<launch>
+  <node name="switch_camera" pkg="funcase_remote" type="switch_camera.py" />
+</launch>

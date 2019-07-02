@@ -1,0 +1,4 @@
+<launch>
+  <node name="lora_rec_joy" pkg="funcase_remote" type="lora_rec_joy.py" />
+  <node name="switch_camera" pkg="funcase_remote" type="switch_camera.py" />
+</launch>
