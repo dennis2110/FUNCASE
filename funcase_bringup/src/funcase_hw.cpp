@@ -1,6 +1,6 @@
 #include "funcase_hw.h"
 
-FuncaseRobot::FuncaseRobot() : /*serialimu("/dev/mpu6050",5),*/ serialdiff("/dev/chassis",5){
+FuncaseRobot::FuncaseRobot() : /*serialimu("/dev/mpu6050",5),*/ serialdiff("/dev/ttyACM0",5){
   // init param
   for (int i=0;i<2;i++) {
     wheel_cmd[i] = 0;
@@ -113,6 +113,8 @@ void FuncaseRobot::wheelcmd2writediff(double cmd,int n){
   }else if (cmd < 0) {
     if (cmd <-255){
       temp = 255;
+    }else if(cmd > -100){
+      temp = -100;
     }else{
       temp = static_cast<uint8_t>(-cmd);
     }
@@ -121,6 +123,8 @@ void FuncaseRobot::wheelcmd2writediff(double cmd,int n){
   }else if (cmd > 0) {
     if (cmd >255){
       temp = 255;
+    }else if (cmd < 100){
+      temp = 100;
     }else{
       temp = static_cast<uint8_t>(cmd);
     }
@@ -132,11 +136,11 @@ void FuncaseRobot::wheelcmd2writediff(double cmd,int n){
 void FuncaseRobot::publish_sensor_data(){
   std_msgs::UInt8MultiArray sensor_msg;
 #ifdef NORMALIZE_CNY70
-  sensor_msg.data.push_back(normalize(cny70[0], 237, 10));
-  sensor_msg.data.push_back(normalize(cny70[1], 234, 10));
-  sensor_msg.data.push_back(normalize(cny70[2], 233, 10));
-  sensor_msg.data.push_back(normalize(cny70[3], 230, 10));
-  sensor_msg.data.push_back(normalize(cny70[4], 235, 10));
+  sensor_msg.data.push_back(normalize(cny70[0], 110, 9));
+  sensor_msg.data.push_back(normalize(cny70[1], 110, 9));
+  sensor_msg.data.push_back(normalize(cny70[2], 110, 10));
+  sensor_msg.data.push_back(normalize(cny70[3], 110, 10));
+  sensor_msg.data.push_back(normalize(cny70[4], 110, 10));
 #else
   for (int i=0;i<SENSOR_REG_COUNT;i++) {
     sensor_msg.data.push_back(cny70[i]);

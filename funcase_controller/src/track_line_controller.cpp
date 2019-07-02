@@ -39,14 +39,15 @@ bool funcase_controllers::TrackLineController::init(hardware_interface::EffortJo
 void funcase_controllers::TrackLineController::update(const ros::Time &time, const ros::Duration &period){
   ROS_INFO("controller get sensor : %d %d %d %d %d",sensor_data[0],sensor_data[1],sensor_data[2],sensor_data[3],sensor_data[4]);
   error = sensor_data[0] * 2 + sensor_data[1] - sensor_data[3] - sensor_data[4] * 2;
+  ROS_INFO("error: %03d", error);
   error_sum += error;
   error_dot = error_back - error;
   error_back= error;
 
   turn = (k_p)*static_cast<double>(error) + (k_i)*static_cast<double>(error_sum) + (k_d)*static_cast<double>(error_dot);
 
-  m_left_wheel.setCommand(initspeed-turn);
-  m_right_wheel.setCommand(initspeed+turn);
+  m_left_wheel.setCommand(initspeed+turn);
+  m_right_wheel.setCommand(initspeed-turn+10);
 }
 
 void funcase_controllers::TrackLineController::starting(const ros::Time &time){

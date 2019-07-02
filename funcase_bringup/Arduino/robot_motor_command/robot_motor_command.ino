@@ -1,10 +1,10 @@
 #include<Motor.h>
-#define EN_R 10
-#define EN_L 9
-#define R1 7
-#define R2 6
-#define L1 4
-#define L2 5
+#define EN_R 9
+#define EN_L 6
+#define R1 4
+#define R2 5
+#define L1 2
+#define L2 3
 
 Motor motorR(EN_R, R1, R2);
 Motor motorL(EN_L, L1, L2);
