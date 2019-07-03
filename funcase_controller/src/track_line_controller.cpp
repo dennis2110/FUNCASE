@@ -38,7 +38,7 @@ bool funcase_controllers::TrackLineController::init(hardware_interface::EffortJo
 
 void funcase_controllers::TrackLineController::update(const ros::Time &time, const ros::Duration &period){
   ROS_INFO("controller get sensor : %d %d %d %d %d",sensor_data[0],sensor_data[1],sensor_data[2],sensor_data[3],sensor_data[4]);
-  error = sensor_data[0] * 10 + sensor_data[1]*4 + sensor_data[2]*2 + sensor_data[3] -sensor_data[5] - sensor_data[6]*2 - sensor_data[7]*4 - sensor_data[8]*10;
+  error = sensor_data[0]*2 + sensor_data[1]*1.5 + sensor_data[2] - sensor_data[3] -sensor_data[4]*1.5 - sensor_data[5]*2;
   error_sum += error;
   error_dot = error - error_back;
   error_back= error;
@@ -104,21 +104,18 @@ bool funcase_controllers::TrackLineController::read_parameter(){
   return true;
 }
 
-void funcase_controllers::TrackLineController::setCommand(uint8_t sensor1, uint8_t sensor2, uint8_t sensor3, uint8_t sensor4, uint8_t sensor5, uint8_t sensor6, uint8_t sensor7, uint8_t sensor8, uint8_t sensor9){
+void funcase_controllers::TrackLineController::setCommand(uint8_t sensor1, uint8_t sensor2, uint8_t sensor3, uint8_t sensor4, uint8_t sensor5, uint8_t sensor6){
   sensor_data[0] = sensor1;
   sensor_data[1] = sensor2;
   sensor_data[2] = sensor3;
   sensor_data[3] = sensor4;
   sensor_data[4] = sensor5;
   sensor_data[5] = sensor6;
-  sensor_data[6] = sensor7;
-  sensor_data[7] = sensor8;
-  sensor_data[8] = sensor9;
   //ROS_INFO("sensor %d", sensor_data[3]);
 }
 
 void funcase_controllers::TrackLineController::setCommandCB(const std_msgs::UInt8MultiArrayConstPtr &sensor_msg){
-  setCommand(sensor_msg->data.at(0),sensor_msg->data.at(1),sensor_msg->data.at(2),sensor_msg->data.at(3),sensor_msg->data.at(4),sensor_msg->data.at(5),sensor_msg->data.at(6),sensor_msg->data.at(7),sensor_msg->data.at(8));
+  setCommand(sensor_msg->data.at(0),sensor_msg->data.at(1),sensor_msg->data.at(2),sensor_msg->data.at(3),sensor_msg->data.at(4),sensor_msg->data.at(5));
 }
 
 void funcase_controllers::TrackLineController::callback_reconfigure(funcase_controller::TrackLinePIDparamConfig &config, uint32_t level){

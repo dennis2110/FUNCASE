@@ -82,7 +82,7 @@ void FuncaseRobot::init(ros::NodeHandle *node){
 void FuncaseRobot::read(){
   //serialimu.read();
   serialdiff.read();
-  for(int i=0;i<9;i++){
+  for(int i=0;i<SENSOR_REG_COUNT;i++){
     cny70[i] = serialdiff.raw_diff[i];
   }
 

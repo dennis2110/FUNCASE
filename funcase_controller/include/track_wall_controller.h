@@ -12,15 +12,17 @@
 #include "funcase_controllers/TrackWallPIDparamConfig.h"
 
 #include "sensor_msgs/LaserScan.h"
+#include "std_msgs/Float64.h"
 #include "track_wall_fuzzy.h"
 
 #define HOUGH_TRANSFORM
+#define USE_HOKUYO
 
-#ifdef USE_YDLIDAR
-  #define laser_sample_num 720
-  #define laser_start      159
-  #define laser_end        201
-  #define laser_range_min  0.1
+#ifdef USE_HOKUYO
+  #define laser_sample_num 683
+  #define laser_start      64
+  #define laser_end        106
+  #define laser_range_min  0.02
 #else
   #define laser_sample_num 360
   #define laser_start      249
@@ -68,6 +70,8 @@ namespace funcase_controllers
     hardware_interface::JointHandle joint_;
     //track lidar sub
     ros::Subscriber track_lidar_sub;
+    //pub data
+    ros::Publisher error_pub;
 
     //param for PID
     float error_angle;
