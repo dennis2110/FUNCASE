@@ -30,6 +30,7 @@ bool funcase_controllers::TrackWallController::init(hardware_interface::EffortJo
   if(!read_parameter()) return false;
 
   track_lidar_sub = m_node.subscribe<sensor_msgs::LaserScan>("/scan", 1, &TrackWallController::setCommandCB, this);
+  error_pub = m_node.advertise<std_msgs::Float64>("/err", 1);
 
   return true;
 }
@@ -41,7 +42,11 @@ void funcase_controllers::TrackWallController::update(const ros::Time &time, con
   wallfuzzy.nowstatus(angle_save, wallangle, r_save, wallrange);
   wallfuzzy.fuzzify();
   turn = static_cast<double>(wallfuzzy.defuzzify());
-
+  /////////////////////////////////////
+  std_msgs::Float64 err_msg;
+  err_msg.data = angle_save;
+  error_pub.publish(err_msg);
+  /////////////////////////////////////
   /*if(turn > 0){
     m_left_wheel.setCommand(initspeed+turn);
     m_right_wheel.setCommand(initspeed);
@@ -156,8 +161,8 @@ void funcase_controllers::TrackWallController::hough_transform(float *ave_laser,
   ////////////////////////////////////////////////////////
   //if(out == 0){
     for(int i=0;i<laser_num;i++){
-      x[i] = laser_value[i]*cos((laser_locate[i]-180)*1* M_PIf32 /180);
-      y[i] = laser_value[i]*sin((laser_locate[i]-180)*1* M_PIf32 /180);
+      x[i] = laser_value[i]*cos((laser_locate[i]+171)*0.3515* M_PIf32 /180);
+      y[i] = laser_value[i]*sin((laser_locate[i]+171)*0.3515* M_PIf32 /180);
       if(max_x < ave_laser[i]){
         max_x = laser_value[i];
       }

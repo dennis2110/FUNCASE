@@ -1,6 +1,6 @@
 #include "funcase_hw.h"
 
-FuncaseRobot::FuncaseRobot() : /*serialimu("/dev/mpu6050",5),*/ serialdiff("/dev/ttyACM0",5){
+FuncaseRobot::FuncaseRobot() : /*serialimu("/dev/mpu6050",5),*/ serialdiff("/dev/chassis",5){
   // init param
   for (int i=0;i<2;i++) {
     wheel_cmd[i] = 0;
