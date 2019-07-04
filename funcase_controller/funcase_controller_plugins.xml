@@ -8,6 +8,22 @@
     </description>
   </class>
 
+  <class name="funcase_controllers/TrackLineCVController"
+    type="funcase_controllers::TrackLineCVController"
+    base_class_type="controller_interface::ControllerBase">
+    <description>
+      The Track Line Controller (use opencv) expects an EffortJointInterface type of hardware interface.
+    </description>
+  </class>
+
+  <class name="funcase_controllers/TrackLineFuzzyController"
+    type="funcase_controllers::TrackLineFuzzyController"
+    base_class_type="controller_interface::ControllerBase">
+    <description>
+      The Track Line Controller (use fuzzy) expects an EffortJointInterface type of hardware interface.
+    </description>
+  </class>
+
   <class name="funcase_controllers/TrackWallController"
     type="funcase_controllers::TrackWallController"
     base_class_type="controller_interface::ControllerBase">
