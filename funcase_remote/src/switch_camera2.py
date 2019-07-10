@@ -5,7 +5,7 @@ sys.path.append('/opt/nvidia/jetson-gpio/lib/python/')
 sys.path.append('/opt/nvidia/jetson-gpio/lib/python/GPIO')
 import Jetson.GPIO as gpio
 import rospy
-from funcase_msgs.msg import JoyCmd
+from std_msgs.msg import Bool
 
 gpio.setmode(gpio.BCM)
 switch = 18 ## Pin 12
@@ -15,22 +15,20 @@ swit = False
 
 def callback(data):
     global swit
-    joy_cmd = data
-    button = joy_cmd.joy[0].encode("hex")
-    sum_ = int(button[0]) * 16 + int(button[1])*1
-    #print(c)
-    
-    if sum_ == 4:
-        swit = True
-        gpio.output(switch,gpio.HIGH)
-    if sum_ == 2:
+    sum_ = data.data
+    #print "sum_ = ", sum_
+
+    if sum_ == False:
         swit = False
+        gpio.output(switch,gpio.HIGH)
+    if sum_ == True:
+        swit = True
         gpio.output(switch,gpio.LOW)
-    print(swit)
+    print "switch = ", swit
      
 def listener():
-    rospy.init_node('switch_camera')
-    rospy.Subscriber("/joy_commands", JoyCmd, callback, queue_size=1)
+    rospy.init_node('switch_camera2')
+    rospy.Subscriber("/switch_camera", Bool, callback, queue_size=1)
 
 while not rospy.is_shutdown():
     listener()
