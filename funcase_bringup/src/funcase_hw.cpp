@@ -1,6 +1,6 @@
 #include "funcase_hw.h"
 
-FuncaseRobot::FuncaseRobot() : /*serialimu("/dev/ttyUSB1",5),*/ /*serialdiff("/dev/ttyUSB0",5)*/ serialarm("/dev/ttyACM0",5){
+FuncaseRobot::FuncaseRobot() : /*serialimu("/dev/ttyUSB1",5),*/ /*serialdiff("/dev/ttyUSB0",5)*/ serialarm("/dev/ttyTHS1",5){
   for (int i=0;i<2;i++) {
     wheel_cmd[i] = 0;
     wheel_eff[i] = 0;
@@ -139,8 +139,8 @@ void FuncaseRobot::init(ros::NodeHandle *node){
 }
 
 void FuncaseRobot::read(){
-  serialarm.read();
-  readarm[0] = serialarm.raw_arm[0];
+  //serialarm.read();
+  //readarm[0] = serialarm.raw_arm[0];
 //  serialdiff.read();
 
 //  cny70[0] = serialdiff.raw_diff[0];
@@ -148,7 +148,7 @@ void FuncaseRobot::read(){
 //  cny70[2] = serialdiff.raw_diff[2];
 //  cny70[3] = serialdiff.raw_diff[3];
   //ROS_INFO("read imu data: %4.3f %4.3f %4.3f %4.3f",orientation[0],orientation[1],orientation[2],orientation[3]);
-  ROS_INFO("read arm data: %0.d",readarm[0]);
+  //ROS_INFO("read arm data: %0.d",readarm[0]);
 //  publish_sensor_data();
 }
 
@@ -156,6 +156,8 @@ void FuncaseRobot::write(){
 
   armcmd2writearm(r_arm_cmd, l_arm_cmd);
   serialarm.write(writearm, 17);
+
+
   ROS_INFO("write right arm data: %03d %03d %03d %03d %03d",writearm[0],writearm[2],writearm[4],writearm[6],writearm[8]);
   ROS_INFO("write left arm data: %03d %03d %03d %03d",writearm[10],writearm[12],writearm[14],writearm[16]);
 }
@@ -186,7 +188,7 @@ void FuncaseRobot::wheelcmd2writediff(double cmd,int n){
 
 void FuncaseRobot::armcmd2writearm(double* r_cmd, double* l_cmd){
   for (int i=1;i<16;i+=2) {
-    writearm[i]=0;
+    writearm[i]=1;
   }
   for(int i=0;i<5;i++){
     writearm[i*2] = static_cast<uint8_t>(r_cmd[i]);
