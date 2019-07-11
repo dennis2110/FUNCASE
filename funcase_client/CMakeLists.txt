@@ -148,6 +148,9 @@ target_link_libraries(robotcontrol_test_stage ${catkin_LIBRARIES})
 add_executable(funcase_remoterobot_client src/funcase_remoterobot_client.cpp)
 target_link_libraries(funcase_remoterobot_client ${catkin_LIBRARIES})
 
+add_executable(funcase_test_stage test/funcase_test_stage.cpp)
+target_link_libraries(funcase_test_stage ${catkin_LIBRARIES})
+
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
 ## target back to the shorter version for ease of user use
