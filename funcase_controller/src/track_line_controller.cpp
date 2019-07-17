@@ -37,7 +37,7 @@ bool funcase_controllers::TrackLineController::init(hardware_interface::EffortJo
 }
 
 void funcase_controllers::TrackLineController::update(const ros::Time &time, const ros::Duration &period){
-  ROS_INFO("controller get sensor : %d %d %d %d %d",sensor_data[0],sensor_data[1],sensor_data[2],sensor_data[3],sensor_data[4]);
+  ROS_INFO("controller get sensor : %d %d %d %d %d %d",sensor_data[0],sensor_data[1],sensor_data[2],sensor_data[3],sensor_data[4],sensor_data[5]);
   error = sensor_data[0]*2 + sensor_data[1]*1.5 + sensor_data[2] - sensor_data[3] -sensor_data[4]*1.5 - sensor_data[5]*2;
   error_sum += error;
   error_dot = error - error_back;
