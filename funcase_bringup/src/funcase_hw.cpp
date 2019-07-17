@@ -7,6 +7,22 @@ FuncaseRobot::FuncaseRobot() : /*serialimu("/dev/ttyUSB1",5),*/ /*serialdiff("/d
     wheel_pos[i] = 0;
     wheel_vel[i] = 0;
   }
+  for (int i=0;i<5;i++){
+    r_arm_eff[i] = 0;
+    r_arm_pos[i] = 0;
+    r_arm_vel[i] = 0;
+  }
+  for (int i=0;i<4;i++){
+    l_arm_cmd[i] = 0;
+    l_arm_eff[i] = 0;
+    l_arm_pos[i] = 0;
+    l_arm_vel[i] = 0;
+  }
+  r_arm_cmd[0] = 128;
+  r_arm_cmd[1] = 128;
+  r_arm_cmd[2] = 128;
+  r_arm_cmd[3] = 90;
+  r_arm_cmd[4] = 180;
 
   // connect and register the joint state interface
   //wheel
@@ -188,7 +204,7 @@ void FuncaseRobot::wheelcmd2writediff(double cmd,int n){
 
 void FuncaseRobot::armcmd2writearm(double* r_cmd, double* l_cmd){
   for (int i=1;i<16;i+=2) {
-    writearm[i]=1;
+    writearm[i]=255;
   }
   for(int i=0;i<5;i++){
     writearm[i*2] = static_cast<uint8_t>(r_cmd[i]);
