@@ -14,24 +14,24 @@
 #define PB_err_ang 0.3f
 
 #define NB_err_ran -0.10f
-#define NS_err_ran -0.08f
+#define NS_err_ran -0.05f
 #define ZO_err_ran 0.0f
-#define PS_err_ran 0.08f
+#define PS_err_ran 0.05f
 #define PB_err_ran 0.10f
 
-#define NB_u -30
-#define NS_u -10
+#define NB_u -40
+#define NS_u -20
 #define ZO_u 0
-#define PS_u 10
-#define PB_u 30
+#define PS_u 20
+#define PB_u 40
 
 using namespace std;
 
-int rulebaseU[] = { NB_u ,NB_u ,NB_u ,NS_u ,ZO_u ,
-                    NB_u ,NS_u ,NS_u ,ZO_u ,PB_u ,
+int rulebaseU[] = { NB_u ,NB_u ,NB_u ,NS_u ,PB_u ,
+                    NB_u ,NS_u ,NS_u ,PS_u ,PB_u ,
                     NB_u ,NS_u ,ZO_u ,PS_u ,PB_u ,
-                    NS_u ,ZO_u ,PS_u ,PS_u ,PB_u ,
-                    ZO_u ,PS_u ,PB_u ,PB_u ,PB_u };
+                    NB_u ,NS_u ,PS_u ,PS_u ,PB_u ,
+                    NB_u ,PS_u ,PB_u ,PB_u ,PB_u };
 
 class FuzzyCountrol {
 public:

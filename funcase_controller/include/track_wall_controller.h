@@ -20,9 +20,12 @@
 
 #ifdef USE_HOKUYO
   #define laser_sample_num 683
-  #define laser_start      64
-  #define laser_end        106
+  #define laser_start      1
+  #define laser_end        169
   #define laser_range_min  0.02
+  #define laser_range_max  1.0
+  #define num_of_samples   169
+  #define resolution       100
 #else
   #define laser_sample_num 360
   #define laser_start      249
@@ -80,9 +83,9 @@ namespace funcase_controllers
     float error_sum;
     float error_dot;
     float error_back;
-    float lidar_value[43];
-    float x[43];
-    float y[43];
+    float lidar_value[num_of_samples];
+    float x[num_of_samples];
+    float y[num_of_samples];
     float r_save;
     float angle_save;
     float wallangle;

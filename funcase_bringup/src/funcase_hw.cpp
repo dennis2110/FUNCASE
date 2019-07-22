@@ -110,7 +110,7 @@ void FuncaseRobot::write(){
 void FuncaseRobot::wheelcmd2writediff(double cmd,int n){
   uint8_t temp;
   if(cmd == 0.0){
-    writediff[n] = 0;
+    writediff[n] = 255;
     writediff[n+1] = 3;
   }else if (cmd < 0) {
     if (cmd <-255){
