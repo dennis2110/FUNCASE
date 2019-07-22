@@ -14,6 +14,8 @@
 #include "sensor_msgs/LaserScan.h"
 #include "std_msgs/Float64.h"
 #include "track_wall_fuzzy.h"
+//#include "track_wall_fuzzy_range.h"
+//#include "track_wall_fuzzy_twolayer.h"
 
 #define HOUGH_TRANSFORM
 #define USE_HOKUYO

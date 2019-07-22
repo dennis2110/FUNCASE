@@ -12,6 +12,7 @@ find_package(catkin REQUIRED COMPONENTS
   rospy
   sensor_msgs
   std_msgs
+  std_srvs
 )
 
 ## System dependencies are found with CMake's conventions
@@ -106,7 +107,7 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES funcase_test
-#  CATKIN_DEPENDS roscpp rospy sensor_msgs std_msgs
+  CATKIN_DEPENDS roscpp rospy sensor_msgs std_msgs std_srvs
 #  DEPENDS system_lib
 )
 
@@ -140,6 +141,17 @@ add_executable(lidar_hough_transform	src/lidar_hough_transform.cpp)
 #add_dependencies(lidar_hough_transform ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(lidar_hough_transform ${catkin_LIBRARIES})
 
+add_executable(test_main_loop	src/test_main_loop.cpp)
+target_link_libraries(test_main_loop ${catkin_LIBRARIES})
+
+add_executable(test_main_loop_start	src/test_main_loop_start.cpp)
+target_link_libraries(test_main_loop_start ${catkin_LIBRARIES})
+
+add_executable(test_main_loop_middle	src/test_main_loop_middle.cpp)
+target_link_libraries(test_main_loop_middle ${catkin_LIBRARIES})
+
+add_executable(test_main_loop_start_decelerate	src/test_main_loop_start_decelerate.cpp)
+target_link_libraries(test_main_loop_start_decelerate ${catkin_LIBRARIES})
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
