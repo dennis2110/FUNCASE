@@ -1,6 +1,6 @@
 #include "funcase_hw.h"
 
-FuncaseRobot::FuncaseRobot() : /*serialimu("/dev/mpu6050",5),*/ serialdiff("/dev/chassis",5), serialarm("/dev/ttyACM0",5){
+FuncaseRobot::FuncaseRobot() : /*serialimu("/dev/mpu6050",5),*/ serialdiff("/dev/chassis",5), serialarm("/dev/ttyTHS1",5){
   // init param
   for (int i=0;i<2;i++) {
     wheel_cmd[i] = 0;
@@ -17,6 +17,22 @@ FuncaseRobot::FuncaseRobot() : /*serialimu("/dev/mpu6050",5),*/ serialdiff("/dev
     angular_velocity_covariance[i] = 0.0;
     linear_acceleration_covariance[i] = 0.0;
   }
+  for (int i=0;i<5;i++){
+    r_arm_eff[i] = 0;
+    r_arm_pos[i] = 0;
+    r_arm_vel[i] = 0;
+  }
+  for (int i=0;i<4;i++){
+    l_arm_cmd[i] = 0;
+    l_arm_eff[i] = 0;
+    l_arm_pos[i] = 0;
+    l_arm_vel[i] = 0;
+  }
+  r_arm_cmd[0] = 128;
+  r_arm_cmd[1] = 128;
+  r_arm_cmd[2] = 128;
+  r_arm_cmd[3] = 90;
+  r_arm_cmd[4] = 180;
 
   // connect and register the joint state interface
   //wheel
@@ -150,18 +166,18 @@ void FuncaseRobot::init(ros::NodeHandle *node){
 
 void FuncaseRobot::read(){
   serialdiff.read();
-  serialarm.read();
+  //serialarm.read();
 
   cny70[0] = serialdiff.raw_diff[0];
   cny70[1] = serialdiff.raw_diff[1];
   cny70[2] = serialdiff.raw_diff[2];
   cny70[3] = serialdiff.raw_diff[3];
   cny70[4] = serialdiff.raw_diff[4];
-  readarm[0] = serialarm.raw_arm[0];
+  //readarm[0] = serialarm.raw_arm[0];
 
   //ROS_INFO("read imu data: %4.3f %4.3f %4.3f %4.3f",orientation[0],orientation[1],orientation[2],orientation[3]);
-  ROS_INFO("read arm data: %03d",readarm[0]);
-  publish_sensor_data();
+  //ROS_INFO("read arm data: %0.d",readarm[0]);
+  //publish_sensor_data();
 }
 
 void FuncaseRobot::write(){
@@ -171,6 +187,7 @@ void FuncaseRobot::write(){
 
   serialdiff.write(writediff,5);
   serialarm.write(writearm, 17);
+
 
   ROS_INFO("diff data: %03d %03d %03d %03d",writediff[0],writediff[1],writediff[2],writediff[3]);
   ROS_INFO("write right arm data: %03d %03d %03d %03d %03d",writearm[0],writearm[2],writearm[4],writearm[6],writearm[8]);
@@ -203,7 +220,7 @@ void FuncaseRobot::wheelcmd2writediff(double cmd,int n){
 
 void FuncaseRobot::armcmd2writearm(double* r_cmd, double* l_cmd){
   for (int i=1;i<16;i+=2) {
-    writearm[i]=0;
+    writearm[i]=255;
   }
   for(int i=0;i<5;i++){
     writearm[i*2] = static_cast<uint8_t>(r_cmd[i]);
