@@ -167,14 +167,13 @@ void FuncaseRobot::init(ros::NodeHandle *node){
 void FuncaseRobot::read(){
   serialdiff.read();
   //serialarm.read();
-
-  cny70[0] = serialdiff.raw_diff[0];
-  cny70[1] = serialdiff.raw_diff[1];
-  cny70[2] = serialdiff.raw_diff[2];
-  cny70[3] = serialdiff.raw_diff[3];
-  cny70[4] = serialdiff.raw_diff[4];
   //readarm[0] = serialarm.raw_arm[0];
 
+  for(int i=0;i<SENSOR_REG_COUNT;i++){
+    cny70[i] = serialdiff.raw_diff[i];
+  }
+
+  //ROS_INFO("read cny70 data: %03d %03d %03d %03d",cny70[0],cny70[1],cny70[2],cny70[3]);
   //ROS_INFO("read imu data: %4.3f %4.3f %4.3f %4.3f",orientation[0],orientation[1],orientation[2],orientation[3]);
   //ROS_INFO("read arm data: %0.d",readarm[0]);
   //publish_sensor_data();
@@ -197,7 +196,7 @@ void FuncaseRobot::write(){
 void FuncaseRobot::wheelcmd2writediff(double cmd,int n){
   uint8_t temp;
   if(cmd == 0.0){
-    writediff[n] = 0;
+    writediff[n] = 255;
     writediff[n+1] = 3;
   }else if (cmd < 0) {
     if (cmd <-255){
@@ -233,11 +232,12 @@ void FuncaseRobot::armcmd2writearm(double* r_cmd, double* l_cmd){
 void FuncaseRobot::publish_sensor_data(){
   std_msgs::UInt8MultiArray sensor_msg;
 #ifdef NORMALIZE_CNY70
-  sensor_msg.data.push_back(normalize(cny70[0], 237, 10));
-  sensor_msg.data.push_back(normalize(cny70[1], 234, 10));
-  sensor_msg.data.push_back(normalize(cny70[2], 233, 10));
-  sensor_msg.data.push_back(normalize(cny70[3], 230, 10));
-  sensor_msg.data.push_back(normalize(cny70[4], 235, 10));
+  sensor_msg.data.push_back(normalize(cny70[0], 110, 10));
+  sensor_msg.data.push_back(normalize(cny70[1], 110, 10));
+  sensor_msg.data.push_back(normalize(cny70[2], 110, 10));
+  sensor_msg.data.push_back(normalize(cny70[3], 90, 10));
+  sensor_msg.data.push_back(normalize(cny70[4], 110, 10));
+  sensor_msg.data.push_back(normalize(cny70[5], 110, 10));
 #else
   for (int i=0;i<SENSOR_REG_COUNT;i++) {
     sensor_msg.data.push_back(cny70[i]);

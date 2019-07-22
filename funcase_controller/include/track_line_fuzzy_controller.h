@@ -1,5 +1,5 @@
-#ifndef TRACK_LINE_CONTROLLER_H
-#define TRACK_LINE_CONTROLLER_H
+#ifndef TRACK_LINE_FUZZY_CONTROLLER_H
+#define TRACK_LINE_FUZZY_CONTROLLER_H
 
 #include <controller_interface/controller.h>
 #include <hardware_interface/joint_command_interface.h>
@@ -15,11 +15,13 @@
 #include <dynamic_reconfigure/server.h>
 #include "funcase_controllers/TrackLinePIDparamConfig.h"
 
+#include "track_line_fuzzy.h"
+
 #define SENSOR_REG_COUNT (6)
 
 namespace funcase_controllers
 {
-  class TrackLineController : public controller_interface::
+  class TrackLineFuzzyController : public controller_interface::
                     Controller<hardware_interface::EffortJointInterface>
   {
 
@@ -27,8 +29,8 @@ namespace funcase_controllers
     //dynamic_reconfigure::Server<funcase_controller::TrackLinePIDparamConfig> m_server;
 
   public:
-    TrackLineController();
-    ~TrackLineController();
+    TrackLineFuzzyController();
+    ~TrackLineFuzzyController();
     bool init(hardware_interface::EffortJointInterface* robot, ros::NodeHandle& node);
     void update(const ros::Time& time, const ros::Duration& period);
 
@@ -67,22 +69,12 @@ namespace funcase_controllers
 
     uint8_t sensor_data[SENSOR_REG_COUNT];
 
-    //param for PID
-    int error;
-    int error_sum;
-    int error_dot;
-    int error_back;
-
+    //param for fuzzy
     double initspeed;
     double turn;
-    double k_p;
-    double k_i;
-    double k_d;
 
-
+    LineFuzzyCountrol linefuzzy;
   };
 }
 
-
-
-#endif // TRACK_LINE_CONTROLLER_H
+#endif // TRACK_LINE_FUZZY_CONTROLLER_H

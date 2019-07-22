@@ -1,15 +1,15 @@
-#include "track_line_controller.h"
+#include "track_line_cv_controller.h"
 
-funcase_controllers::TrackLineController::TrackLineController() :
+funcase_controllers::TrackLineCVController::TrackLineCVController() :
    error_sum(0), error_back(0), initspeed(90.0), k_p(0.4), k_i(0.0), k_d(0.0){
 
 }
 
-funcase_controllers::TrackLineController::~TrackLineController(){
+funcase_controllers::TrackLineCVController::~TrackLineCVController(){
 
 }
 
-bool funcase_controllers::TrackLineController::init(hardware_interface::EffortJointInterface *robot, ros::NodeHandle &node){
+bool funcase_controllers::TrackLineCVController::init(hardware_interface::EffortJointInterface *robot, ros::NodeHandle &node){
   // Register node for parent and robot handle
   m_node = node;
   m_robot = robot;
@@ -23,7 +23,7 @@ bool funcase_controllers::TrackLineController::init(hardware_interface::EffortJo
 
   dyn_reconf_server_ = std::make_shared<ReconfigureServer>(m_node);
   dyn_reconf_server_->updateConfig(config);
-  dyn_reconf_server_->setCallback(boost::bind(&TrackLineController::callback_reconfigure, this, _1, _2));
+  dyn_reconf_server_->setCallback(boost::bind(&TrackLineCVController::callback_reconfigure, this, _1, _2));
   //dynamic_reconfigure::Server<funcase_controller::TrackLinePIDparamConfig>::CallbackType f;
   //f = boost::bind(&TrackLineController::callback_reconfigure, this, _1, _2);
   //m_server.setCallback(f);
@@ -31,14 +31,14 @@ bool funcase_controllers::TrackLineController::init(hardware_interface::EffortJo
   // read the parameter at parameter server and registe to class
   if(!read_parameter()) return false;
 
-  track_sensor_sub = m_node.subscribe<std_msgs::UInt8MultiArray>("/track_line_sensor",1, &TrackLineController::setCommandCB, this);
+  track_cv_sub = m_node.subscribe<std_msgs::Float64>("/track_cv_sensor",1, &TrackLineCVController::setCommandCB, this);
 
   return true;
 }
 
-void funcase_controllers::TrackLineController::update(const ros::Time &time, const ros::Duration &period){
-  ROS_INFO("controller get sensor : %d %d %d %d %d %d",sensor_data[0],sensor_data[1],sensor_data[2],sensor_data[3],sensor_data[4],sensor_data[5]);
-  error = sensor_data[0]*2 + sensor_data[1]*1.5 + sensor_data[2] - sensor_data[3] -sensor_data[4]*1.5 - sensor_data[5]*2;
+void funcase_controllers::TrackLineCVController::update(const ros::Time &time, const ros::Duration &period){
+
+
   error_sum += error;
   error_dot = error - error_back;
   error_back= error;
@@ -49,11 +49,11 @@ void funcase_controllers::TrackLineController::update(const ros::Time &time, con
   m_right_wheel.setCommand(initspeed+turn);
 }
 
-void funcase_controllers::TrackLineController::starting(const ros::Time &time){
+void funcase_controllers::TrackLineCVController::starting(const ros::Time &time){
 
 }
 
-void funcase_controllers::TrackLineController::stopping(const ros::Time &time){
+void funcase_controllers::TrackLineCVController::stopping(const ros::Time &time){
   const double vel = 0.0;
   for (int i = 0; i<2; i++){
     m_left_wheel.setCommand(vel);
@@ -61,7 +61,7 @@ void funcase_controllers::TrackLineController::stopping(const ros::Time &time){
   }
 }
 
-bool funcase_controllers::TrackLineController::read_parameter(){
+bool funcase_controllers::TrackLineCVController::read_parameter(){
   XmlRpc::XmlRpcValue joint_names;
   if(!m_node.getParam("wheels",joint_names)){
     ROS_ERROR("No 'wheel joints' in controller. (namespace: %s)",
@@ -104,21 +104,21 @@ bool funcase_controllers::TrackLineController::read_parameter(){
   return true;
 }
 
-void funcase_controllers::TrackLineController::setCommand(uint8_t sensor1, uint8_t sensor2, uint8_t sensor3, uint8_t sensor4, uint8_t sensor5, uint8_t sensor6){
-  sensor_data[0] = sensor1;
-  sensor_data[1] = sensor2;
-  sensor_data[2] = sensor3;
-  sensor_data[3] = sensor4;
-  sensor_data[4] = sensor5;
-  sensor_data[5] = sensor6;
-  //ROS_INFO("sensor %d", sensor_data[3]);
+//void funcase_controllers::TrackLineCVController::setCommand(uint8_t sensor1, uint8_t sensor2, uint8_t sensor3, uint8_t sensor4, uint8_t sensor5, uint8_t sensor6){
+//  sensor_data[0] = sensor1;
+//  sensor_data[1] = sensor2;
+//  sensor_data[2] = sensor3;
+//  sensor_data[3] = sensor4;
+//  sensor_data[4] = sensor5;
+//  sensor_data[5] = sensor6;
+//  //ROS_INFO("sensor %d", sensor_data[3]);
+//}
+
+void funcase_controllers::TrackLineCVController::setCommandCB(const std_msgs::Float64ConstPtr& cv_error_msg){
+  error = cv_error_msg->data;
 }
 
-void funcase_controllers::TrackLineController::setCommandCB(const std_msgs::UInt8MultiArrayConstPtr &sensor_msg){
-  setCommand(sensor_msg->data.at(0),sensor_msg->data.at(1),sensor_msg->data.at(2),sensor_msg->data.at(3),sensor_msg->data.at(4),sensor_msg->data.at(5));
-}
-
-void funcase_controllers::TrackLineController::callback_reconfigure(funcase_controller::TrackLinePIDparamConfig &config, uint32_t level){
+void funcase_controllers::TrackLineCVController::callback_reconfigure(funcase_controller::TrackLinePIDparamConfig &config, uint32_t level){
   ROS_INFO("Reconfigure Request:  kP = %f, ki = %f, kD = %f, initspeed = %f",config.k_p , config.k_i, config.k_d, config.initspeed);
   k_p = config.k_p;
   k_i = config.k_i;
@@ -126,4 +126,4 @@ void funcase_controllers::TrackLineController::callback_reconfigure(funcase_cont
   initspeed = config.initspeed;
 }
 
-PLUGINLIB_EXPORT_CLASS(funcase_controllers::TrackLineController, controller_interface::ControllerBase)
+PLUGINLIB_EXPORT_CLASS(funcase_controllers::TrackLineCVController, controller_interface::ControllerBase)

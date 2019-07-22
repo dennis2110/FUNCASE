@@ -30,6 +30,7 @@ bool funcase_controllers::TrackWallController::init(hardware_interface::EffortJo
   if(!read_parameter()) return false;
 
   track_lidar_sub = m_node.subscribe<sensor_msgs::LaserScan>("/scan", 1, &TrackWallController::setCommandCB, this);
+  error_pub = m_node.advertise<std_msgs::Float64>("/err", 1);
 
   return true;
 }
@@ -41,7 +42,11 @@ void funcase_controllers::TrackWallController::update(const ros::Time &time, con
   wallfuzzy.nowstatus(angle_save, wallangle, r_save, wallrange);
   wallfuzzy.fuzzify();
   turn = static_cast<double>(wallfuzzy.defuzzify());
-
+  /////////////////////////////////////
+  std_msgs::Float64 err_msg;
+  err_msg.data = angle_save;
+  error_pub.publish(err_msg);
+  /////////////////////////////////////
   /*if(turn > 0){
     m_left_wheel.setCommand(initspeed+turn);
     m_right_wheel.setCommand(initspeed);
@@ -49,8 +54,8 @@ void funcase_controllers::TrackWallController::update(const ros::Time &time, con
     m_left_wheel.setCommand(initspeed);
     m_right_wheel.setCommand(initspeed-turn);
   }*/
-  m_left_wheel.setCommand(initspeed+turn);
-  m_right_wheel.setCommand(initspeed-turn);
+  m_left_wheel.setCommand(initspeed-turn);
+  m_right_wheel.setCommand(initspeed+turn);
 }
 
 void funcase_controllers::TrackWallController::starting(const ros::Time &time){
@@ -129,11 +134,11 @@ void funcase_controllers::TrackWallController::setCommandCB(const sensor_msgs::L
 }
 
 void funcase_controllers::TrackWallController::hough_transform(float *ave_laser, float &_r_save, float &_angle_save){
-  float laser_value[43];
-  int laser_num, laser_locate[43];
+  float laser_value[num_of_samples];
+  int laser_num, laser_locate[num_of_samples];
 
-  int acc_arr[41][41]={};
-  float acc_num[41];
+  int acc_arr[resolution+1][resolution+1]={};
+  float acc_num[resolution+1];
 
   float max_x=0, rho;
 
@@ -145,10 +150,20 @@ void funcase_controllers::TrackWallController::hough_transform(float *ave_laser,
   //int out=0;
 
   int cnt = 0;
-  for(int i=0;i<43;i++){
-    if(ave_laser[i]>= static_cast<float>(laser_range_min)){
-      laser_value[cnt] = ave_laser[i];
-      laser_locate[cnt]= i+laser_start;
+  int cnt2= 0;
+  for(int i=0;i<num_of_samples;i++){
+    if(isnan(ave_laser[i])){
+      
+    }else{
+      laser_value[cnt2] = ave_laser[i];//laser_value[i];
+      laser_locate[cnt2]= i+laser_start;//laser_locate[i];
+      cnt2++;
+    }
+  }
+  for(int i=0;i<cnt2;i++){
+    if((laser_value[i]>= static_cast<float>(laser_range_min)) && (laser_value[i]<= static_cast<float>(laser_range_max))){
+      laser_value[cnt] = laser_value[i];
+      laser_locate[cnt]= laser_locate[i];
       cnt++;
     }
   }
@@ -156,24 +171,24 @@ void funcase_controllers::TrackWallController::hough_transform(float *ave_laser,
   ////////////////////////////////////////////////////////
   //if(out == 0){
     for(int i=0;i<laser_num;i++){
-      x[i] = laser_value[i]*cos((laser_locate[i]-180)*1* M_PIf32 /180);
-      y[i] = laser_value[i]*sin((laser_locate[i]-180)*1* M_PIf32 /180);
+      x[i] = laser_value[i]*cos((laser_locate[i]+171)*0.3515* M_PIf32 /180);
+      y[i] = laser_value[i]*sin((laser_locate[i]+171)*0.3515* M_PIf32 /180);
       if(max_x < ave_laser[i]){
         max_x = laser_value[i];
       }
     }
     //ROS_INFO("max_x: %4.3f", max_x);
     //segmentation rho to 41 resolution
-    for(int i=0;i<41;i++){
-      acc_num[i] = -max_x+(max_x*2/40)*i;
+    for(int i=0;i<resolution+1;i++){
+      acc_num[i] = -max_x+(max_x*2/resolution)*i;
     }
 
     for(int i=0;i<laser_num;i++){
-      for(int j=0;j<41;j++){
-        rho = x[i]*cos(j*(M_PIf32/40))+y[i]*sin(j*(M_PIf32/40));
+      for(int j=0;j<resolution+1;j++){
+        rho = x[i]*cos(j*(M_PIf32/resolution))+y[i]*sin(j*(M_PIf32/resolution));
         //ROS_INFO("%d rho: %4.3f", j, rho);
         //if(r > 0){
-        for(int k=0;k<41;k++){
+        for(int k=0;k<resolution+1;k++){
           err = abs(acc_num[k]- rho) ;
           if(err_min > err){
             err_min = err;
@@ -190,8 +205,8 @@ void funcase_controllers::TrackWallController::hough_transform(float *ave_laser,
       }
     }
 
-    for(int i=0;i<41;i++){
-      for(int j=0;j<41;j++){
+    for(int i=0;i<resolution+1;i++){
+      for(int j=0;j<resolution+1;j++){
         if(ticket_max <acc_arr[j][i]){
           ticket_max=acc_arr[j][i];
           r_angle[0]=j;
@@ -201,7 +216,7 @@ void funcase_controllers::TrackWallController::hough_transform(float *ave_laser,
       }
     }
     _r_save = acc_num[r_angle[0]];
-    _angle_save = r_angle[1]*(M_PIf32/40);
+    _angle_save = r_angle[1]*(M_PIf32/resolution);
 
 }
 

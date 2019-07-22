@@ -3,13 +3,13 @@
 
 //#define LIDAR_DEBUG
 #define HOUGH_TRANSFORM
-//#define USE_YDLIDAR
+#define USE_HOKUYO
 
-#ifdef USE_YDLIDAR
-  #define laser_sample_num 720
-  #define laser_start      159
-  #define laser_end        201
-  #define laser_range_min  0.1
+#ifdef USE_HOKUYO
+  #define laser_sample_num 683
+  #define laser_start      64
+  #define laser_end        106
+  #define laser_range_min  0.02
 #else
   #define laser_sample_num 360
   #define laser_start      249
@@ -30,9 +30,9 @@ void hough_transform(float ave_laser[], float &_r_save, float& _angle_save);
 void lidarCallback(const sensor_msgs::LaserScanConstPtr& msg)
 {
 #ifdef LIDAR_DEBUG
-//  ROS_INFO("angle_max[%4.3f] angle_min[%4.3f] range_max[%4.3f] range_min[%4.3f] scan_time[%4.3f] angle_increment[%4.3f] time_increment[%4.3f]"
-//             , msg->angle_max, msg->angle_min, msg->range_max, msg->range_min, msg->scan_time, msg->angle_increment, msg->time_increment);
-//  ROS_INFO("laser_sample_num: %d", static_cast<int>(msg->ranges.size()));
+  ROS_INFO("angle_max[%4.3f] angle_min[%4.3f] range_max[%4.3f] range_min[%4.3f] scan_time[%4.3f] angle_increment[%4.3f] time_increment[%4.3f]"
+             , msg->angle_max, msg->angle_min, msg->range_max, msg->range_min, msg->scan_time, msg->angle_increment, msg->time_increment);
+  ROS_INFO("laser_sample_num: %d", static_cast<int>(msg->ranges.size()));
     int count = 0;
     for(size_t i=0;i<laser_sample_num;i++){
       laser_msg[i] = msg->ranges.at(i);
@@ -40,7 +40,7 @@ void lidarCallback(const sensor_msgs::LaserScanConstPtr& msg)
         count++;
       }
     }
-    ROS_INFO("deg0:%4.3f deg90:%4.3f deg180:%4.3f deg270:%4.3f deg359:%4.3f ",laser_msg[0], laser_msg[90], laser_msg[180], laser_msg[270], laser_msg[359]);
+    ROS_INFO("deg90:%4.3f deg180:%4.3f deg270:%4.3f",laser_msg[85], laser_msg[341], laser_msg[597]);
 #endif
 
 
@@ -93,8 +93,8 @@ void hough_transform(float ave_laser[], float &_r_save, float& _angle_save){
   ////////////////////////////////////////////////////////
   //if(out == 0){
     for(int i=0;i<laser_num;i++){
-      x[i] = laser_value[i]*cos((laser_locate[i]-180)*1*pi/180);
-      y[i] = laser_value[i]*sin((laser_locate[i]-180)*1*pi/180);
+      x[i] = laser_value[i]*cos((laser_locate[i]+171)*0.3515*pi/180);
+      y[i] = laser_value[i]*sin((laser_locate[i]+171)*0.3515*pi/180);
       if(max_x < ave_laser[i]){
         max_x = laser_value[i];
       }

@@ -129,6 +129,8 @@ include_directories(
 ## Declare a C++ library
  add_library(${PROJECT_NAME}
    src/track_line_controller.cpp
+   src/track_line_cv_controller.cpp
+   src/track_line_fuzzy_controller.cpp
    src/track_wall_controller.cpp
    src/move_it_controller.cpp
    src/arm_controller.cpp

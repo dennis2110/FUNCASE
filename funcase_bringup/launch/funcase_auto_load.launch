@@ -1,0 +1,5 @@
+<launch>
+  <include file="$(find funcase_bringup)/launch/funcase_load_controller.launch" />
+  <include file="$(find mpu6050_serial_to_imu)/launch/test_IMU_yaw.launch" />
+  <include file="$(find urg_node)/launch/urg_lidar.launch" />
+</launch>

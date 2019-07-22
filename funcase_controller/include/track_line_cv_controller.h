@@ -9,17 +9,15 @@
 #include <realtime_tools/realtime_buffer.h>
 #include <control_msgs/JointControllerState.h>
 
-#include <std_msgs/UInt8MultiArray.h>
 #include <boost/scoped_ptr.hpp>
-
 #include <dynamic_reconfigure/server.h>
 #include "funcase_controllers/TrackLinePIDparamConfig.h"
 
-#define SENSOR_REG_COUNT (6)
+#include "std_msgs/Float64.h"
 
 namespace funcase_controllers
 {
-  class TrackLineController : public controller_interface::
+  class TrackLineCVController : public controller_interface::
                     Controller<hardware_interface::EffortJointInterface>
   {
 
@@ -27,8 +25,8 @@ namespace funcase_controllers
     //dynamic_reconfigure::Server<funcase_controller::TrackLinePIDparamConfig> m_server;
 
   public:
-    TrackLineController();
-    ~TrackLineController();
+    TrackLineCVController();
+    ~TrackLineCVController();
     bool init(hardware_interface::EffortJointInterface* robot, ros::NodeHandle& node);
     void update(const ros::Time& time, const ros::Duration& period);
 
@@ -37,8 +35,8 @@ namespace funcase_controllers
 
   private:
     bool read_parameter();
-    void setCommand(uint8_t sensor1,uint8_t sensor2,uint8_t sensor3,uint8_t sensor4,uint8_t sensor5,uint8_t sensor6);
-    void setCommandCB(const std_msgs::UInt8MultiArrayConstPtr& sensor_msg);
+    //void setCommand(uint8_t sensor1,uint8_t sensor2,uint8_t sensor3,uint8_t sensor4,uint8_t sensor5,uint8_t sensor6);
+    void setCommandCB(const std_msgs::Float64ConstPtr& cv_error_msg);
     void callback_reconfigure(funcase_controller::TrackLinePIDparamConfig& config, uint32_t level);
 
 
@@ -62,16 +60,14 @@ namespace funcase_controllers
 
     hardware_interface::JointHandle joint_;
 
-    //track sensor sub
-    ros::Subscriber track_sensor_sub;
-
-    uint8_t sensor_data[SENSOR_REG_COUNT];
+    //cv error sub
+    ros::Subscriber track_cv_sub;
 
     //param for PID
-    int error;
-    int error_sum;
-    int error_dot;
-    int error_back;
+    double error;
+    double error_sum;
+    double error_dot;
+    double error_back;
 
     double initspeed;
     double turn;
