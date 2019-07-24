@@ -20,7 +20,7 @@
 #define turndeg_kp (0.8f)
 
 #define TASK_1_SENSOR_THROSHOLD      (200)
-#define TASK_2_DEG_THROSHOLD         (90.0f)
+#define TASK_2_DEG_THROSHOLD         (-60.0f)
 
 #define TASK_4_SENSOR_THROSHOLD      (100)
 #define TASK_6_DEG_THROSHOLD         (90.0f)
@@ -128,7 +128,7 @@ int main(int argc, char **argv)
   ros::Rate r(30);
   while (ros::ok())
   {
-    if(is_imu_ready){
+    if(is_sensor_ready && is_laser_ready){
       ///////////////////////////////////////////////////////
       ///// if stage change do changeControllers() ones /////
       ///////////////////////////////////////////////////////
@@ -157,7 +157,17 @@ int main(int argc, char **argv)
 
       if(stage == 15){
         //stop at stage 15
-      }else if (stage_change_detect(stage)){
+      }else if (stage == 2){
+        if(stage_change_detect(stage)){
+          stage = 201;
+          is_call = false;
+	}
+      }else if (stage == 201){
+        if(stage_change_detect(stage)){
+	  stage = 3;
+	  is_call = false;
+	}
+      }else if(stage_change_detect(stage)){
         stage++;
         is_call = false;
       }
@@ -167,6 +177,7 @@ int main(int argc, char **argv)
     }//end if imu_ready
 #ifdef SHOW_DEBUG
     ROS_INFO("yaw: %4.3f",yaw);
+    ROS_INFO("stage: %d",stage);
 #endif
     ros::spinOnce();
     r.sleep();
@@ -258,23 +269,29 @@ void changeControllers(int _stage, ros::ServiceClient* _funcase_client,ros::Serv
     break;
 
   case 1:
-    moveit_msg.data.push_back(100);
-    moveit_msg.data.push_back(100);
+    moveit_msg.data.push_back(110);
+    moveit_msg.data.push_back(130);
     pubmsg_enable = true;
     break;
 
   case 2:
-    moveit_msg.data.push_back(100);
     moveit_msg.data.push_back(-100);
+    moveit_msg.data.push_back(210);
     pubmsg_enable = true;
     break;
-
+  case 201:
+    moveit_msg.data.push_back(120);
+    moveit_msg.data.push_back(110);
+    pubmsg_enable = true;
+    SetLineDynamicParams(&dynamic_msg, 0.2,0.0,4.5,130.0);
+    dyline_enable = true;
+    break;
   case 3:
     switch_control.request.stop_controllers.push_back("move_it_controller");
-    switch_control.request.start_controllers.push_back("track_line_controller");
-    SetLineDynamicParams(&dynamic_msg, 0.2,0.0,4.5,130.0);
+ switch_control.request.start_controllers.push_back("track_line_controller");
+    
+    //SetLineDynamicParams(&dynamic_msg, 0.0,0.0,0.0,0.0);
     switch_enable = true;
-    dyline_enable = true;
     break;
 
   case 4:
@@ -283,6 +300,7 @@ void changeControllers(int _stage, ros::ServiceClient* _funcase_client,ros::Serv
     if(speed > 130.0)
       speed = 130.0;
     SetLineDynamicParams(&dynamic_msg, 0.2,0.0,4.5,speed);
+    //SetLineDynamicParams(&dynamic_msg, 0.0,0.0,0.0,0.0);
     dyline_enable = true;
     break;
 
@@ -382,16 +400,50 @@ bool stage_change_detect(int _stage){
 
   case 1:
     //sensor all black
-    if(get_sensor_average() > TASK_1_SENSOR_THROSHOLD)
-      return true;
+    //if(get_sensor_average() > TASK_1_SENSOR_THROSHOLD)
+    //  return true;
+    if(!fg_usetimer){
+      last_time = ros::Time::now();
+      fg_usetimer = true;
+    }
+    if(fg_usetimer){
+      if(ros::Time::now().toSec() - last_time.toSec() > 0.9) {
+        fg_usetimer = false;
+        last_time = ros::Time::now();
+        return true;
+      }
+    }
     break;
 
   case 2:
-    //yaw > 90
-    if(yaw > TASK_2_DEG_THROSHOLD)
-      return true;
+    //yaw < -90
+    //if(yaw < TASK_2_DEG_THROSHOLD)
+    //  return true;
+    if(!fg_usetimer){
+      last_time = ros::Time::now();
+      fg_usetimer = true;
+    }
+    if(fg_usetimer){
+      if(ros::Time::now().toSec() - last_time.toSec() > 0.75) {
+        fg_usetimer = false;
+        last_time = ros::Time::now();
+        return true;
+      }
+    }
     break;
-
+  case 201:
+    if(!fg_usetimer){
+      last_time = ros::Time::now();
+      fg_usetimer = true;
+    }
+    if(fg_usetimer){
+      if(ros::Time::now().toSec() - last_time.toSec() > 0.65) {
+        fg_usetimer = false;
+        last_time = ros::Time::now();
+        return true;
+      }
+    }
+    break;
   case 3:
     if(!fg_usetimer){
       last_time = ros::Time::now();

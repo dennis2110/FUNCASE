@@ -54,6 +54,8 @@ void funcase_controllers::TrackWallController::update(const ros::Time &time, con
     m_left_wheel.setCommand(initspeed);
     m_right_wheel.setCommand(initspeed-turn);
   }*/
+  std::cout << "left speed->" << initspeed - turn << std::endl;
+  std::cout << "right speed->" << initspeed + turn << std::endl;
   m_left_wheel.setCommand(initspeed-turn);
   m_right_wheel.setCommand(initspeed+turn);
 }

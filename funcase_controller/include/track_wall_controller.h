@@ -24,7 +24,7 @@
   #define laser_sample_num 683
   #define laser_start      1
   #define laser_end        169
-  #define laser_range_min  0.02
+  #define laser_range_min  0.1
   #define laser_range_max  1.0
   #define num_of_samples   169
   #define resolution       100

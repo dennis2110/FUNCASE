@@ -5,25 +5,23 @@
 //#define DEBUG_VS15
 #define DEBUG_ROS
 
-#define NB_err_ran -0.10f
-#define NS_err_ran -0.05f
+#define NB_err_ran -0.08f
+#define NS_err_ran -0.01f
 #define ZO_err_ran 0.0f
-#define PS_err_ran 0.05f
-#define PB_err_ran 0.10f
+#define PS_err_ran 0.01f
+#define PB_err_ran 0.08f
 
-#define NB_dot_ran -0.2f
-#define NS_dot_ran -0.05f
+#define NB_dot_ran -0.003f
+#define NS_dot_ran -0.001f
 #define ZO_dot_ran 0.0f
-#define PS_dot_ran 0.05f
-#define PB_dot_ran 0.2f
+#define PS_dot_ran 0.001f
+#define PB_dot_ran 0.003f
 
-
-
-#define NB_u -40
-#define NS_u -20
+#define NB_u -30
+#define NS_u -10
 #define ZO_u 0
-#define PS_u 20
-#define PB_u 40
+#define PS_u 10
+#define PB_u 30
 
 using namespace std;
 ///////////////////////
@@ -36,6 +34,8 @@ int rulebaseU[] = { NB_u ,NB_u ,NB_u ,NS_u ,ZO_u ,
                     NB_u ,NS_u ,ZO_u ,PS_u ,PB_u ,
                     NB_u ,ZO_u ,PS_u ,PS_u ,PB_u ,
                     ZO_u ,PS_u ,PB_u ,PB_u ,PB_u };
+
+
 
 class FuzzyCountrol {
 public:
@@ -123,22 +123,22 @@ void FuzzyCountrol::fuzzify()
   {
     fuzzyError_ran_dot[0] = 1;
   }
-  if (_err_ran_dot > NB_dot_ran && _err_ran_dot < NS_dot_ran)
+  if (_err_ran_dot >= NB_dot_ran && _err_ran_dot < NS_dot_ran)
   {
     fuzzyError_ran_dot[0] = (NS_dot_ran - _err_ran_dot) / (NS_dot_ran - NB_dot_ran);
     fuzzyError_ran_dot[1] = (_err_ran_dot - NB_dot_ran) / (NS_dot_ran - NB_dot_ran);
   }
-  if (_err_ran_dot > NS_dot_ran && _err_ran_dot < ZO_dot_ran)
+  if (_err_ran_dot >= NS_dot_ran && _err_ran_dot < ZO_dot_ran)
   {
     fuzzyError_ran_dot[1] = (ZO_dot_ran - _err_ran_dot) / (ZO_dot_ran - NS_dot_ran);
     fuzzyError_ran_dot[2] = (_err_ran_dot - NS_dot_ran) / (ZO_dot_ran - NS_dot_ran);
   }
-  if (_err_ran_dot > ZO_dot_ran && _err_ran_dot < PS_dot_ran)
+  if (_err_ran_dot >= ZO_dot_ran && _err_ran_dot < PS_dot_ran)
   {
     fuzzyError_ran_dot[2] = (PS_dot_ran - _err_ran_dot) / (PS_dot_ran - ZO_dot_ran);
     fuzzyError_ran_dot[3] = (_err_ran_dot - ZO_dot_ran) / (PS_dot_ran - ZO_dot_ran);
   }
-  if (_err_ran_dot > PS_dot_ran && _err_ran_dot < PB_dot_ran)
+  if (_err_ran_dot >= PS_dot_ran && _err_ran_dot < PB_dot_ran)
   {
     fuzzyError_ran_dot[3] = (PB_dot_ran - _err_ran_dot) / (PB_dot_ran - PS_dot_ran);
     fuzzyError_ran_dot[4] = (_err_ran_dot - PS_dot_ran) / (PB_dot_ran - PS_dot_ran);
