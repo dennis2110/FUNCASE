@@ -19,11 +19,13 @@
 
 #define SWITCH_CONTROLLER_DURATION    (0.2)
 #define turndeg_kp (0.8f)
+#define ORIENT_RIGHT_KP  (5.0f)
+#define ORIENT_RIGHT_KD  (5000.0f)
 
 #define TASK_1_SENSOR_THROSHOLD      (200)
-#define TASK_2_DEG_THROSHOLD         (-60.0f)
+#define TASK_2_DEG_THROSHOLD         (90.0f)
 
-#define TASK_4_SENSOR_THROSHOLD      (90)
+#define TASK_4_SENSOR_THROSHOLD      (100)
 #define TASK_6_DEG_THROSHOLD         (90.0f)
 #define TASK_7_WAIT_DURATION         (0.1)
 //#define TASK_3_ABSDEG_THROSHOLD      (1.0)
@@ -35,9 +37,20 @@
 /************************************************/
 
 /***********************************************/
+int16_t turn;
+float error;
+float error_dot = 0.0;
+float error_back = 0.0;
+float wallrange = 0.0;
+/***********************************************/
 bool is_sensor_ready(false);
 bool is_imu_ready(false);
 bool is_laser_ready(false);
+
+float laser_angle_max;
+float laser_angle_min;
+float laser_angle_increment;
+float laser_count_max;
 
 uint8_t sensor_value[SENSOR_REG_COUNT] = { 0 };
 float yaw(0.0);
@@ -54,12 +67,16 @@ void rotation_Xangle(int _mode, float _angle, std_msgs::Int16MultiArray* _move_m
 void SetLineDynamicParams(dynamic_reconfigure::Config* _dynamic_msg, double _k_p, double _k_i, double _k_d, double _initspeed);
 void SetWallDynamicParams(dynamic_reconfigure::Config* _dynamic_msg, double _k_p, double _k_i, double _k_d, double _initspeed, double _wallrange, double _wallangle);
 void changeControllers(int _stage, ros::ServiceClient* _funcase_client,ros::ServiceClient* _set_IMU_zero,
-                       ros::Publisher* _funcase_moveit_pub,  ros::ServiceClient* _dynamic_line_client, ros::ServiceClient* _dynamic_wall_client);
-//void changeControllers(int _stage, ros::ServiceClient* _funcase_client, controller_manager_msgs::SwitchController* _switch_control, ros::ServiceClient* _set_IMU_zero, std_srvs::Empty* _emp_srv,
-//                       ros::Publisher* _funcase_moveit_pub, std_msgs::Int16MultiArray* _moveit_msg, ros::Publisher* _dynamic_line_pub, ros::Publisher* _dynamic_wall_pub, dynamic_reconfigure::Config* _dynamic_msg);
+                       ros::Publisher* _funcase_moveit_pub, ros::ServiceClient* _dynamic_line_client, ros::ServiceClient* _dynamic_wall_client);
 bool stage_change_detect(int _stage);
+
 double get_sensor_average();
-double cot_angle(double _degree);
+float cot_angle(float _degree);
+inline float get_laser_distence(float _angle);
+inline float get_right_distence(float _orient_offset);
+inline float get_left_distence(float _orient_offset);
+inline float get_front_distence(float _orient_offset);
+
 
 /***********************************************/
 
@@ -77,30 +94,39 @@ void callback_IMU_yaw(const std_msgs::Float32ConstPtr& msg){
   is_imu_ready = true;
 }
 void callback_scan(const sensor_msgs::LaserScan msg){
- laser_msg = msg;
+  // Initial the Laser data at first time received /scan topic
+  if( !is_laser_ready ) {
+    laser_angle_max = msg.angle_max;
+    laser_angle_min = msg.angle_min;
+    laser_angle_increment = msg.angle_increment;
+    laser_count_max = (laser_angle_max - laser_angle_min) / laser_angle_increment - 1;
 
- float length_sum(0.0);
- for(size_t i=0;i<9;i++)
-   length_sum += msg.ranges.at(i+81);
- right_length = length_sum / 9;
+    is_laser_ready = true;
+  }
 
- length_sum = 0.0;
- for(size_t i=0;i<9;i++)
-   length_sum += msg.ranges.at(i+337);
- front_length = length_sum / 9;
+  laser_msg = msg;
 
- length_sum = 0.0;
- for(size_t i=0;i<9;i++)
-   length_sum += msg.ranges.at(i+593);
- left_length = length_sum / 9;
- is_laser_ready = true;
+  float length_sum(0.0);
+  for(size_t i=0;i<9;i++)
+  length_sum += msg.ranges.at(i+81);
+  right_length = length_sum / 9;
+
+  length_sum = 0.0;
+  for(size_t i=0;i<9;i++)
+    length_sum += msg.ranges.at(i+337);
+  front_length = length_sum / 9;
+
+  length_sum = 0.0;
+  for(size_t i=0;i<9;i++)
+    length_sum += msg.ranges.at(i+593);
+  left_length = length_sum / 9;
 }
 
 /*********************************************************/
 
 int main(int argc, char **argv)
 {
-  ros::init(argc, argv, "test_main_loop_start_decelerate");
+  ros::init(argc, argv, "test_track_wall");
   ros::NodeHandle node;
 
   /********************************** Client **********************************/
@@ -133,7 +159,7 @@ int main(int argc, char **argv)
   ros::Rate r(30);
   while (ros::ok())
   {
-    if(is_sensor_ready && is_laser_ready){
+    if(is_laser_ready  && is_imu_ready && is_sensor_ready){
       ///////////////////////////////////////////////////////
       ///// if stage change do changeControllers() ones /////
       ///////////////////////////////////////////////////////
@@ -149,8 +175,8 @@ int main(int argc, char **argv)
       ///////////////////////////////////////////////////////
       ////////////// check and change stage /////////////////
       ///////////////////////////////////////////////////////
-      if(stage == 6){
-        //turn deg control
+      if(stage == 1){
+        //track wall
         changeControllers(stage, &funcase_client, &IMU_zero_client, &move_it_pub, &dynamic_line_client, &dynamic_wall_client);
       }else if (stage == 13) {
         //turn deg control
@@ -160,20 +186,9 @@ int main(int argc, char **argv)
         changeControllers(stage, &funcase_client, &IMU_zero_client, &move_it_pub, &dynamic_line_client, &dynamic_wall_client);
       }
 
-      if(stage == 6){
+      if(stage == 2){
         //stop at stage 15
-      }else if (stage == 2){
-        if(stage_change_detect(stage)){
-          stage = 201;
-          is_call = false;
-	}
-      }else if (stage == 201){
-        if(stage_change_detect(stage)){
-	  //stage = 3;
-          stage = 3;
-	  is_call = false;
-	}
-      }else if(stage_change_detect(stage)){
+      }else if (stage_change_detect(stage)){
         stage++;
         is_call = false;
       }
@@ -184,7 +199,6 @@ int main(int argc, char **argv)
 #ifdef SHOW_DEBUG
     ROS_INFO("yaw: %4.3f",yaw);
     ROS_INFO("stage: %d",stage);
-    ROS_INFO("right_length: %4.3F front_length: %4.3F left_length: %4.3F",right_length,front_length,left_length);
 #endif
     ros::spinOnce();
     r.sleep();
@@ -192,10 +206,12 @@ int main(int argc, char **argv)
 
   return 0;
 }
+
+////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////// function ///////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 
 void rotation_Xangle(int _mode, float _angle, std_msgs::Int16MultiArray* _move_msg){
-  int16_t turn;
   switch (_mode) {
   case 0:
     turn = static_cast<int16_t>(turndeg_kp * (_angle - yaw));
@@ -216,6 +232,7 @@ void rotation_Xangle(int _mode, float _angle, std_msgs::Int16MultiArray* _move_m
 }
 void SetLineDynamicParams(dynamic_reconfigure::Config* _dynamic_msg, double _k_p, double _k_i, double _k_d, double _initspeed){
   dynamic_reconfigure::DoubleParameter dynamic_double;
+
   dynamic_double.name = "k_p";
   dynamic_double.value = _k_p;
   _dynamic_msg->doubles.push_back(dynamic_double);
@@ -231,6 +248,7 @@ void SetLineDynamicParams(dynamic_reconfigure::Config* _dynamic_msg, double _k_p
 }
 void SetWallDynamicParams(dynamic_reconfigure::Config* _dynamic_msg, double _k_p, double _k_i, double _k_d, double _initspeed, double _wallrange, double _wallangle){
   dynamic_reconfigure::DoubleParameter dynamic_double;
+
   dynamic_double.name = "k_p";
   dynamic_double.value = _k_p;
   _dynamic_msg->doubles.push_back(dynamic_double);
@@ -272,46 +290,44 @@ void changeControllers(int _stage, ros::ServiceClient* _funcase_client,ros::Serv
   bool dywall_enable(false);
   switch (_stage) {
   case 0:
-    switch_control.request.start_controllers.push_back("move_it_controller");
+    wallrange = right_length; switch_control.request.start_controllers.push_back("move_it_controller");
     switch_enable = true;
     setzeo_enable = true;
     break;
 
   case 1:
-    moveit_msg.data.push_back(110);
-    moveit_msg.data.push_back(130);
+    //         ORIENT_RIGHT_KP              TASK_10_LENGTH_RIGHT
+    error = (wallrange - get_right_distence(cot_angle(yaw)));
+    error_dot = error - error_back;
+    error_back= error;
+
+    turn = static_cast<int16_t>(ORIENT_RIGHT_KP*error + ORIENT_RIGHT_KD*error_dot);
+    moveit_msg.data.push_back(100+turn);
+    moveit_msg.data.push_back(100-turn+10);
     pubmsg_enable = true;
+
+    printf("cot_angle: %4.3f\n",cot_angle(yaw));
+    printf("turn: %d\n", turn);
+    printf("r speed: %d\n", 100+turn);
+    printf("l speed: %d\n\n", 100-turn);
     break;
 
   case 2:
-    moveit_msg.data.push_back(-100);
-    moveit_msg.data.push_back(150);
+    moveit_msg.data.push_back(0);
+    moveit_msg.data.push_back(0);
     pubmsg_enable = true;
     break;
-  case 201:
-    moveit_msg.data.push_back(140);
-    moveit_msg.data.push_back(100);
-    pubmsg_enable = true;
-    break;
+
   case 3:
-    switch_control.request.stop_controllers.push_back("move_it_controller");
- switch_control.request.start_controllers.push_back("track_line_controller");
-    SetLineDynamicParams(&dynamic_msg, 0.2,0.0,4.5,130.0);
-    dynamic_srv.request.config = dynamic_msg;
-    dyline_enable = true;
-    //SetLineDynamicParams(&dynamic_msg, 0.0,0.0,0.0,0.0);
-    switch_enable = true;
+
     break;
 
   case 4:
     double speed;
-    speed = static_cast<double>(front_length * 75);
+    speed = static_cast<double>(front_length * 100);
     if(speed > 130.0)
       speed = 130.0;
-    if(speed < 100.0)
-      speed = 100.0;
-    SetLineDynamicParams(&dynamic_msg, 0.2,0.0,4.5,speed);
-    //SetLineDynamicParams(&dynamic_msg, 0.0,0.0,0.0,0.0);
+    SetLineDynamicParams(&dynamic_msg, 0.2,0.0,4.5,130.0);
     dynamic_srv.request.config = dynamic_msg;
     dyline_enable = true;
     break;
@@ -348,7 +364,6 @@ void changeControllers(int _stage, ros::ServiceClient* _funcase_client,ros::Serv
     switch_control.request.stop_controllers.push_back("track_line_controller");
     switch_control.request.start_controllers.push_back("track_wall_controller");
     SetWallDynamicParams(&dynamic_msg, 0.5,0.0,1.0,150.0,0.5,1.571);
-    dynamic_srv.request.config = dynamic_msg;
     switch_enable = true;
     dywall_enable = true;
     break;
@@ -377,8 +392,7 @@ void changeControllers(int _stage, ros::ServiceClient* _funcase_client,ros::Serv
     //start stack wall
     break;
   }
-  if(pubmsg_enable)
-    _funcase_moveit_pub->publish(moveit_msg);
+
   if(setzeo_enable)
     _set_IMU_zero->call(emp_srv);
   if(dyline_enable)
@@ -389,7 +403,8 @@ void changeControllers(int _stage, ros::ServiceClient* _funcase_client,ros::Serv
     //_dynamic_wall_pub->publish(dynamic_msg);
   if(switch_enable)
     _funcase_client->call(switch_control);
-  
+  if(pubmsg_enable)
+    _funcase_moveit_pub->publish(moveit_msg);
 }
 
 bool stage_change_detect(int _stage){
@@ -414,15 +429,12 @@ bool stage_change_detect(int _stage){
     break;
 
   case 1:
-    //sensor all black
-    //if(get_sensor_average() > TASK_1_SENSOR_THROSHOLD)
-    //  return true;
     if(!fg_usetimer){
       last_time = ros::Time::now();
       fg_usetimer = true;
     }
     if(fg_usetimer){
-      if(ros::Time::now().toSec() - last_time.toSec() > 0.9) {
+      if(ros::Time::now().toSec() - last_time.toSec() > 7.0) {
         fg_usetimer = false;
         last_time = ros::Time::now();
         return true;
@@ -431,34 +443,11 @@ bool stage_change_detect(int _stage){
     break;
 
   case 2:
-    //yaw < -90
-    //if(yaw < TASK_2_DEG_THROSHOLD)
-    //  return true;
-    if(!fg_usetimer){
-      last_time = ros::Time::now();
-      fg_usetimer = true;
-    }
-    if(fg_usetimer){
-      if(ros::Time::now().toSec() - last_time.toSec() > 0.67) {
-        fg_usetimer = false;
-        last_time = ros::Time::now();
-        return true;
-      }
-    }
+    //yaw > 90
+    if(yaw > TASK_2_DEG_THROSHOLD)
+      return true;
     break;
-  case 201:
-    if(!fg_usetimer){
-      last_time = ros::Time::now();
-      fg_usetimer = true;
-    }
-    if(fg_usetimer){
-      if(ros::Time::now().toSec() - last_time.toSec() > 0.5) {
-        fg_usetimer = false;
-        last_time = ros::Time::now();
-        return true;
-      }
-    }
-    break;
+
   case 3:
     if(!fg_usetimer){
       last_time = ros::Time::now();
@@ -608,13 +597,37 @@ double get_sensor_average() {
     return sum / SENSOR_REG_COUNT;
 }
 
-double cot_angle(double _degree) {
-  if( _degree < 0.0) {
-    double times_ = fabs(_degree) / (2*M_PI);
-    return ( fmod( _degree + ( 2*M_PI * (floor(times_)+1) ) + M_PI  ,2*M_PI) - M_PI);
-  } else if ( _degree > 0.0) {
-    return ( fmod( _degree + M_PI ,2*M_PI) - M_PI);
+float cot_angle(float _degree) {
+  if( _degree < 0.0f) {
+    float times_ = fabs(_degree) / (2*M_PIf32);
+    return ( fmod( _degree + ( 2*M_PIf32 * (floor(times_)+1) ) + M_PIf32  ,2*M_PIf32) - M_PIf32);
+  } else if ( _degree > 0.0f) {
+    return ( fmod( _degree + M_PIf32 ,2*M_PIf32) - M_PIf32);
   } else {
     return 0.0;
   }
 }
+
+float get_laser_distence(float _angle) {
+
+    float _ref_orient_increment_diff = _angle - laser_angle_min;
+    float _ref_count = _ref_orient_increment_diff / laser_angle_increment;
+
+    if( _ref_count < 0)
+        _ref_count = 1;
+    else if( _ref_count > laser_count_max)
+        _ref_count = laser_count_max;
+    ///add 7/29
+    printf("count: %d\n", static_cast<int>(_ref_count));
+    printf("ranges: %4.3f\n", laser_msg.ranges.at(static_cast<size_t>(_ref_count)));
+    ///add 7/29
+    
+    return laser_msg.ranges.at(static_cast<size_t>(_ref_count));
+}
+
+float get_right_distence(float _orient_offset) { return get_laser_distence( -M_PIf32/2 - _orient_offset); }
+
+float get_left_distence(float _orient_offset) { return get_laser_distence( M_PIf32/2 - _orient_offset); }
+
+float get_front_distence(float _orient_offset) { return get_laser_distence( _orient_offset ); }
+

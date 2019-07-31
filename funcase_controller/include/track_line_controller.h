@@ -72,6 +72,7 @@ namespace funcase_controllers
     int error_sum;
     int error_dot;
     int error_back;
+    int error_L;
 
     double initspeed;
     double turn;
@@ -79,7 +80,9 @@ namespace funcase_controllers
     double k_i;
     double k_d;
 
-
+    bool is_usetimer;
+    bool is_change;
+    ros::Time last_time;
   };
 }
 

@@ -5,23 +5,23 @@
 
 #define DEBUG_ROS
 
-#define NB_dot_ang -0.10f
-#define NS_dot_ang -0.05f
+#define NB_dot_ang -0.1f
+#define NS_dot_ang -0.03f
 #define ZO_dot_ang 0.0f
-#define PS_dot_ang 0.05f
-#define PB_dot_ang 0.10f
+#define PS_dot_ang 0.03f
+#define PB_dot_ang 0.1f
 
-#define NB_dot_ran -0.10f
-#define NS_dot_ran -0.05f
+#define NB_dot_ran -0.05f
+#define NS_dot_ran -0.02f
 #define ZO_dot_ran 0.0f
-#define PS_dot_ran 0.05f
-#define PB_dot_ran 0.10f
+#define PS_dot_ran 0.02f
+#define PB_dot_ran 0.05f
 
-#define NB_op1 -20
-#define NS_op1 -10
+#define NB_op1 -10
+#define NS_op1 -5
 #define ZO_op1 0
-#define PS_op1 10
-#define PB_op1 20
+#define PS_op1 5
+#define PB_op1 10
 
 /////////////////////////////////
 
@@ -31,19 +31,19 @@
 #define PS_firstOP 10
 #define PB_firstOP 20
 
-#define NB_err_ran -0.10f
+#define NB_err_ran -0.08f
 #define NS_err_ran -0.05f
 #define ZO_err_ran 0.0f
 #define PS_err_ran 0.05f
-#define PB_err_ran 0.10f
+#define PB_err_ran 0.08f
 
-#define NB_op2 -30
-#define NM_op2 -20
-#define NS_op2 -10
+#define NB_op2 -40
+#define NM_op2 -30
+#define NS_op2 -20
 #define ZO_op2 0
-#define PS_op2 10
-#define PM_op2 20
-#define PB_op2 30
+#define PS_op2 20
+#define PM_op2 30
+#define PB_op2 40
 
 using namespace std;
 ///////////////////////
@@ -79,7 +79,11 @@ int rulebaseOP2[] = { NB_op2 ,NB_op2 ,NS_op2 ,NS_op2 ,PS_op2 ,
 class FuzzyCountrol {
 public:
   FuzzyCountrol(){
-
+    FuzzyCountrol::rulebase();
+    _err_ang_bak = 0.0;
+    _err_ran_bak = 0.0;
+    _err_ang_dot = 0.0;
+    _err_ran_dot = 0.0;
   }
   ~FuzzyCountrol(){
 
@@ -120,7 +124,7 @@ void FuzzyCountrol::nowstatus(float now_ang, float wall_ang, float now_ran, floa
   _err_ran_dot = _err_ran - _err_ran_bak;
   _err_ran_bak = _err_ran;
 #ifdef DEBUG_ROS
-  printf("error_range: %4.3f  error_range_dot: %4.3f",static_cast<double>(_err_ran),static_cast<double>(_err_ran_dot));
+  printf("error_range: %4.3f  error_range_dot: %4.3f  error_angle_dot: %4.3f",static_cast<double>(_err_ran),static_cast<double>(_err_ran_dot),static_cast<double>(_err_ang_dot));
   printf("\n");
 #endif
   }
@@ -145,27 +149,27 @@ void FuzzyCountrol::fuzzify1(){
   {
     fuzzyError_ang_dot[0] = 1;
   }
-  if (_err_ang_dot > NB_dot_ang && _err_ang_dot < NS_dot_ang)
+  if (_err_ang_dot >= NB_dot_ang && _err_ang_dot < NS_dot_ang)
   {
     fuzzyError_ang_dot[0] = (NS_dot_ang - _err_ang_dot) / (NS_dot_ang - NB_dot_ang);
     fuzzyError_ang_dot[1] = (_err_ang_dot - NB_dot_ang) / (NS_dot_ang - NB_dot_ang);
   }
-  if (_err_ang_dot > NS_dot_ang && _err_ang_dot < ZO_dot_ang)
+  if (_err_ang_dot >= NS_dot_ang && _err_ang_dot < ZO_dot_ang)
   {
     fuzzyError_ang_dot[1] = (ZO_dot_ang - _err_ang_dot) / (ZO_dot_ang - NS_dot_ang);
     fuzzyError_ang_dot[2] = (_err_ang_dot - NS_dot_ang) / (ZO_dot_ang - NS_dot_ang);
   }
-  if (_err_ang_dot > ZO_dot_ang && _err_ang_dot < PS_dot_ang)
+  if (_err_ang_dot >= ZO_dot_ang && _err_ang_dot < PS_dot_ang)
   {
     fuzzyError_ang_dot[2] = (PS_dot_ang - _err_ang_dot) / (PS_dot_ang - ZO_dot_ang);
     fuzzyError_ang_dot[3] = (_err_ang_dot - ZO_dot_ang) / (PS_dot_ang - ZO_dot_ang);
   }
-  if (_err_ang_dot > PS_dot_ang && _err_ang_dot < PB_dot_ang)
+  if (_err_ang_dot >= PS_dot_ang && _err_ang_dot < PB_dot_ang)
   {
     fuzzyError_ang_dot[3] = (PB_dot_ang - _err_ang_dot) / (PB_dot_ang - PS_dot_ang);
     fuzzyError_ang_dot[4] = (_err_ang_dot - PS_dot_ang) / (PB_dot_ang - PS_dot_ang);
   }
-  if (_err_ang_dot > PB_dot_ang)
+  if (_err_ang_dot >= PB_dot_ang)
   {
     fuzzyError_ang_dot[4] = 1;
   }
@@ -175,27 +179,27 @@ void FuzzyCountrol::fuzzify1(){
   {
     fuzzyError_ran_dot[0] = 1;
   }
-  if (_err_ran_dot > NB_dot_ran && _err_ran_dot < NS_dot_ran)
+  if (_err_ran_dot >= NB_dot_ran && _err_ran_dot < NS_dot_ran)
   {
     fuzzyError_ran_dot[0] = (NS_dot_ran - _err_ran_dot) / (NS_dot_ran - NB_dot_ran);
     fuzzyError_ran_dot[1] = (_err_ran_dot - NB_dot_ran) / (NS_dot_ran - NB_dot_ran);
   }
-  if (_err_ran_dot > NS_dot_ran && _err_ran_dot < ZO_dot_ran)
+  if (_err_ran_dot >= NS_dot_ran && _err_ran_dot < ZO_dot_ran)
   {
     fuzzyError_ran_dot[1] = (ZO_dot_ran - _err_ran_dot) / (ZO_dot_ran - NS_dot_ran);
     fuzzyError_ran_dot[2] = (_err_ran_dot - NS_dot_ran) / (ZO_dot_ran - NS_dot_ran);
   }
-  if (_err_ran_dot > ZO_dot_ran && _err_ran_dot < PS_dot_ran)
+  if (_err_ran_dot >= ZO_dot_ran && _err_ran_dot < PS_dot_ran)
   {
     fuzzyError_ran_dot[2] = (PS_dot_ran - _err_ran_dot) / (PS_dot_ran - ZO_dot_ran);
     fuzzyError_ran_dot[3] = (_err_ran_dot - ZO_dot_ran) / (PS_dot_ran - ZO_dot_ran);
   }
-  if (_err_ran_dot > PS_dot_ran && _err_ran_dot < PB_dot_ran)
+  if (_err_ran_dot >= PS_dot_ran && _err_ran_dot < PB_dot_ran)
   {
     fuzzyError_ran_dot[3] = (PB_dot_ran - _err_ran_dot) / (PB_dot_ran - PS_dot_ran);
     fuzzyError_ran_dot[4] = (_err_ran_dot - PS_dot_ran) / (PB_dot_ran - PS_dot_ran);
   }
-  if (_err_ran_dot > PB_dot_ran)
+  if (_err_ran_dot >= PB_dot_ran)
   {
     fuzzyError_ran_dot[4] = 1;
   }
@@ -241,27 +245,27 @@ void FuzzyCountrol::fuzzify2(float _op1){
   {
     fuzzyFirst_op1[0] = 1;
   }
-  if (_op1 > NB_firstOP && _op1 < NS_firstOP)
+  if (_op1 >= NB_firstOP && _op1 < NS_firstOP)
   {
     fuzzyFirst_op1[0] = (NS_firstOP - _op1) / (NS_firstOP - NB_firstOP);
     fuzzyFirst_op1[1] = (_op1 - NB_firstOP) / (NS_firstOP - NB_firstOP);
   }
-  if (_op1 > NS_firstOP && _op1 < ZO_firstOP)
+  if (_op1 >= NS_firstOP && _op1 < ZO_firstOP)
   {
     fuzzyFirst_op1[1] = (ZO_firstOP - _op1) / (ZO_firstOP - NS_firstOP);
     fuzzyFirst_op1[2] = (_op1 - NS_firstOP) / (ZO_firstOP - NS_firstOP);
   }
-  if (_op1 > ZO_firstOP && _op1 < PS_firstOP)
+  if (_op1 >= ZO_firstOP && _op1 < PS_firstOP)
   {
     fuzzyFirst_op1[2] = (PS_firstOP - _op1) / (PS_firstOP - ZO_firstOP);
     fuzzyFirst_op1[3] = (_op1 - ZO_firstOP) / (PS_firstOP - ZO_firstOP);
   }
-  if (_op1 > PS_firstOP && _op1 < PB_firstOP)
+  if (_op1 >= PS_firstOP && _op1 < PB_firstOP)
   {
     fuzzyFirst_op1[3] = (PB_firstOP - _op1) / (PB_firstOP - PS_firstOP);
     fuzzyFirst_op1[4] = (_op1 - PS_firstOP) / (PB_firstOP - PS_firstOP);
   }
-  if (_op1 > PB_firstOP)
+  if (_op1 >= PB_firstOP)
   {
     fuzzyFirst_op1[4] = 1;
   }
@@ -271,27 +275,27 @@ void FuzzyCountrol::fuzzify2(float _op1){
   {
     fuzzyError_ran[0] = 1;
   }
-  if (_err_ran > NB_err_ran && _err_ran < NS_err_ran)
+  if (_err_ran >= NB_err_ran && _err_ran < NS_err_ran)
   {
     fuzzyError_ran[0] = (NS_err_ran - _err_ran) / (NS_err_ran - NB_err_ran);
     fuzzyError_ran[1] = (_err_ran - NB_err_ran) / (NS_err_ran - NB_err_ran);
   }
-  if (_err_ran > NS_err_ran && _err_ran < ZO_err_ran)
+  if (_err_ran >= NS_err_ran && _err_ran < ZO_err_ran)
   {
     fuzzyError_ran[1] = (ZO_err_ran - _err_ran) / (ZO_err_ran - NS_err_ran);
     fuzzyError_ran[2] = (_err_ran - NS_err_ran) / (ZO_err_ran - NS_err_ran);
   }
-  if (_err_ran > ZO_err_ran && _err_ran < PS_err_ran)
+  if (_err_ran >= ZO_err_ran && _err_ran < PS_err_ran)
   {
     fuzzyError_ran[2] = (PS_err_ran - _err_ran) / (PS_err_ran - ZO_err_ran);
     fuzzyError_ran[3] = (_err_ran - ZO_err_ran) / (PS_err_ran - ZO_err_ran);
   }
-  if (_err_ran > PS_err_ran && _err_ran < PB_err_ran)
+  if (_err_ran >= PS_err_ran && _err_ran < PB_err_ran)
   {
     fuzzyError_ran[3] = (PB_err_ran - _err_ran) / (PB_err_ran - PS_err_ran);
     fuzzyError_ran[4] = (_err_ran - PS_err_ran) / (PB_err_ran - PS_err_ran);
   }
-  if (_err_ran > PB_err_ran)
+  if (_err_ran >= PB_err_ran)
   {
     fuzzyError_ran[4] = 1;
   }

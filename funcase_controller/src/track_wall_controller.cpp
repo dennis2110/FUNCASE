@@ -1,7 +1,8 @@
 #include "track_wall_controller.h"
 
+
 funcase_controllers::TrackWallController::TrackWallController() :
-  error_range(0.0), error_angle(0.0), error_sum(0.0), error_back(0.0), initspeed(80.0), k_p(0.1), k_i(0.0), k_d(0.0){
+  error_range(0.0), error_angle(0.0), error_sum(0.0), error_dot(0.0), error_back(0.0), sum1(0.0), sum2(0.0), initspeed(80.0), k_p(0.1), k_i(0.0), k_d(0.0){
 
 }
 
@@ -19,7 +20,7 @@ bool funcase_controllers::TrackWallController::init(hardware_interface::EffortJo
   config.k_i = 0.0;
   config.k_d = 0.0;
   config.initspeed = 100.0;
-  config.wallrange = 0.2;
+  config.wallrange = 0.35;
   config.wallangle = 1.571;
 
   dyn_reconf_server_ = std::make_shared<ReconfigureServer>(m_node);
@@ -30,7 +31,10 @@ bool funcase_controllers::TrackWallController::init(hardware_interface::EffortJo
   if(!read_parameter()) return false;
 
   track_lidar_sub = m_node.subscribe<sensor_msgs::LaserScan>("/scan", 1, &TrackWallController::setCommandCB, this);
-  error_pub = m_node.advertise<std_msgs::Float64>("/err", 1);
+  //error_pub = m_node.advertise<std_msgs::Float64>("/err", 1);//commend
+  r_angle_error = m_node.advertise<std_msgs::Float64MultiArray>("/wall_msg", 1);
+  r_angle_fuzzy = m_node.advertise<std_msgs::Float64MultiArray>("/wall_fuzzy", 1);
+
 
   return true;
 }
@@ -38,15 +42,63 @@ bool funcase_controllers::TrackWallController::init(hardware_interface::EffortJo
 void funcase_controllers::TrackWallController::update(const ros::Time &time, const ros::Duration &period){
   //error pos turn right
   hough_transform(lidar_value, r_save, angle_save);
-  ROS_INFO("final_r: %4.3f  final_angle: %4.3f",r_save, angle_save);
-  wallfuzzy.nowstatus(angle_save, wallangle, r_save, wallrange);
-  wallfuzzy.fuzzify();
-  turn = static_cast<double>(wallfuzzy.defuzzify());
+  //ROS_INFO("final_r: %4.3f  final_angle: %4.3f",r_save, angle_save);
+  //wallfuzzy.nowstatus(angle_save, wallangle, r_save, wallrange);
+  //wallfuzzy.fuzzify();
+  //turn = static_cast<double>(wallfuzzy.defuzzify());
+
+  /*commend 7/26
   /////////////////////////////////////
   std_msgs::Float64 err_msg;
   err_msg.data = angle_save;
   error_pub.publish(err_msg);
   /////////////////////////////////////
+  */ 
+
+   //add
+   for(int i =0;i<5;i++){
+    printf("lidar[%d]=%4.3f  ",i+1,lidar_value[i]);
+   }   
+   printf("\n");/*
+   for(int i =5;i<10;i++){
+    printf("lidar[%d]=%4.3f  ",i+75,lidar_value[i+74]);
+   }   
+   printf("\n");
+   for(int i =10;i<15;i++){
+    printf("lidar[%d]=%4.3f  ",i+75,lidar_value[i+74]);
+   }   
+   printf("\n");*/
+   for(int i =164;i<169;i++){
+    printf("lidar[%d]=%4.3f  ",i+1,lidar_value[i]);
+   }   
+   printf("\n");
+   //add
+
+  /*add 7/26*/
+  float r_angle_arr[5],wall_fuzzy_arr[10];
+  r_angle_arr[0] = r_save;
+  r_angle_arr[1] = angle_save;
+  r_angle_arr[2] = wallfuzzy._err_ran;
+  r_angle_arr[3] = wallfuzzy._err_ang;
+  r_angle_arr[4] = turn;
+  for(int i =0;i<5;i++){
+   wall_fuzzy_arr[i]=wallfuzzy.fuzzyError_ran[i];
+  }
+  for(int i =5;i<10;i++){
+   wall_fuzzy_arr[i]=wallfuzzy.fuzzyError_ang[i-5];
+  }
+  std_msgs::Float64MultiArray r_angle_err,wall_fuzzy;
+  
+  for(int i =0;i<5;i++){
+   r_angle_err.data.push_back(r_angle_arr[i]);
+  }
+  for(int i =0;i<10;i++){
+   wall_fuzzy.data.push_back(wall_fuzzy_arr[i]);
+  }
+  r_angle_error.publish(r_angle_err);
+  r_angle_fuzzy.publish(wall_fuzzy);
+  /*add 7/26*/ 
+
   /*if(turn > 0){
     m_left_wheel.setCommand(initspeed+turn);
     m_right_wheel.setCommand(initspeed);
@@ -54,10 +106,31 @@ void funcase_controllers::TrackWallController::update(const ros::Time &time, con
     m_left_wheel.setCommand(initspeed);
     m_right_wheel.setCommand(initspeed-turn);
   }*/
+  sum1 = 0.0;
+  sum2 = 0.0;
+  for (int i=0;i<5;i++){
+    if(!isnan(lidar_value[i]))
+      sum1 += lidar_value[i];
+    if(!isnan(lidar_value[i+164]))
+      sum2 += lidar_value[i+164];
+  }
+  //error = (r_save - 0.35) + (sum2/5 - sum1/5);
+  error = sum2/5-wallrange;
+  error_sum += error;
+  error_dot = error - error_back;
+  error_back = error;
+
+  turn = k_p * error + k_i * error_sum + k_d * error_dot;
   std::cout << "left speed->" << initspeed - turn << std::endl;
   std::cout << "right speed->" << initspeed + turn << std::endl;
+  std::cout << "error->" << error << ", error_dot->" << error_dot << std::endl;
+  std::cout << "r_save->" << r_save <<std::endl;
+  std::cout << "turn->" << turn << endl;
+printf("\n");
   m_left_wheel.setCommand(initspeed-turn);
   m_right_wheel.setCommand(initspeed+turn);
+
+  
 }
 
 void funcase_controllers::TrackWallController::starting(const ros::Time &time){
@@ -133,6 +206,7 @@ void funcase_controllers::TrackWallController::setCommandCB(const sensor_msgs::L
     }
 #endif
   //ROS_INFO("wall data: %4.3f %4.3f %4.3f", scan_msg->ranges.at(175), scan_msg->ranges.at(179), scan_msg->ranges.at(183));
+   
 }
 
 void funcase_controllers::TrackWallController::hough_transform(float *ave_laser, float &_r_save, float &_angle_save){

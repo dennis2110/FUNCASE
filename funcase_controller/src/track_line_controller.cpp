@@ -2,7 +2,8 @@
 
 funcase_controllers::TrackLineController::TrackLineController() :
    error_sum(0), error_back(0), initspeed(90.0), k_p(0.4), k_i(0.0), k_d(0.0){
-
+  is_usetimer = false;
+  is_change = false;
 }
 
 funcase_controllers::TrackLineController::~TrackLineController(){
@@ -16,9 +17,9 @@ bool funcase_controllers::TrackLineController::init(hardware_interface::EffortJo
 
   // Initialize dynamic_reconfigure server
   funcase_controller::TrackLinePIDparamConfig config;
-  config.k_p = 0.4;
+  config.k_p = 0.2;
   config.k_i = 0.0;
-  config.k_d = 0.0;
+  config.k_d = 4.5;
   config.initspeed = 100.0;
 
   dyn_reconf_server_ = std::make_shared<ReconfigureServer>(m_node);
@@ -38,16 +39,48 @@ bool funcase_controllers::TrackLineController::init(hardware_interface::EffortJo
 
 void funcase_controllers::TrackLineController::update(const ros::Time &time, const ros::Duration &period){
   ROS_INFO("controller get sensor : %d %d %d %d %d %d",sensor_data[0],sensor_data[1],sensor_data[2],sensor_data[3],sensor_data[4],sensor_data[5]);
-  ROS_INFO("Reconfigure Request:  kP = %f, ki = %f, kD = %f, initspeed = %f",k_p , k_i, k_d, initspeed);
+  
+  
   error = sensor_data[0]*2 + sensor_data[1]*1.5 + sensor_data[2] - sensor_data[3] -sensor_data[4]*1.5 - sensor_data[5]*2;
+  
+  
+   
   error_sum += error;
   error_dot = error - error_back;
   error_back= error;
+  ROS_INFO("Reconfigure Request:  kP = %f, ki = %f, kD = %f, initspeed = %f",k_p , k_i, k_d, initspeed);
+  std::cout << "error->" << error << ", error_sum->" << error_sum << ", error_dot->" << error_dot << std::endl;
+  if(!is_usetimer){
+    if((sensor_data[0] < 30) || (sensor_data[5] < 30)){
+      last_time = ros::Time::now();
+      is_usetimer = true;
+      error_L = error;
+    }
+  }
+  if(is_usetimer){
+    //PID big
+    turn = (0.13)*static_cast<double>(error_L) + (0)*static_cast<double>(error_sum) + (0)*static_cast<double>(error_dot);
+    m_left_wheel.setCommand(-turn);
+    m_right_wheel.setCommand(+turn);
+    std::cout << "left speed->" << -turn << ", right speed->" << turn << std::endl;
+if(ros::Time::now().toSec() - last_time.toSec() > 0.2) {
+      if((sensor_data[2] < 30) || (sensor_data[3] < 30)){
 
-  turn = (k_p)*static_cast<double>(error) + (k_i)*static_cast<double>(error_sum) + (k_d)*static_cast<double>(error_dot);
 
-  m_left_wheel.setCommand(initspeed-turn);
-  m_right_wheel.setCommand(initspeed+turn);
+        is_usetimer = false;
+        //is_change = false;
+        last_time = ros::Time::now();
+      }
+    }
+    
+  }else{
+    turn = (k_p)*static_cast<double>(error) + (k_i)*static_cast<double>(error_sum) + (k_d)*static_cast<double>(error_dot);
+    m_left_wheel.setCommand(initspeed-turn);
+  m_right_wheel.setCommand(initspeed+turn+10);
+  std::cout << "left speed->" << initspeed-turn << ", right speed->" << initspeed+turn+10 << std::endl;
+  }
+  
+  
 }
 
 void funcase_controllers::TrackLineController::starting(const ros::Time &time){

@@ -13,6 +13,7 @@
 
 #include "sensor_msgs/LaserScan.h"
 #include "std_msgs/Float64.h"
+#include "std_msgs/Float64MultiArray.h" //add
 #include "track_wall_fuzzy.h"
 //#include "track_wall_fuzzy_range.h"
 //#include "track_wall_fuzzy_twolayer.h"
@@ -76,15 +77,23 @@ namespace funcase_controllers
     //track lidar sub
     ros::Subscriber track_lidar_sub;
     //pub data
-    ros::Publisher error_pub;
+    //ros::Publisher error_pub; //commend
+     /*add 7/26*/
+    ros::Publisher r_angle_error;
+    ros::Publisher r_angle_fuzzy;
+    /*add*/
 
     //param for PID
     float error_angle;
     float error_range;
 
+    float error;
     float error_sum;
     float error_dot;
     float error_back;
+    float sum1;
+    float sum2;
+
     float lidar_value[num_of_samples];
     float x[num_of_samples];
     float y[num_of_samples];
