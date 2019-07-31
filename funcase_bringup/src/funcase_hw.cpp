@@ -23,7 +23,6 @@ FuncaseRobot::FuncaseRobot() : /*serialimu("/dev/mpu6050",5),*/ serialdiff("/dev
     r_arm_vel[i] = 0;
   }
   for (int i=0;i<4;i++){
-    l_arm_cmd[i] = 0;
     l_arm_eff[i] = 0;
     l_arm_pos[i] = 0;
     l_arm_vel[i] = 0;
@@ -33,6 +32,11 @@ FuncaseRobot::FuncaseRobot() : /*serialimu("/dev/mpu6050",5),*/ serialdiff("/dev
   r_arm_cmd[2] = 128;
   r_arm_cmd[3] = 90;
   r_arm_cmd[4] = 180;
+
+  l_arm_cmd[0] = 128;
+  l_arm_cmd[1] = 128;
+  l_arm_cmd[2] = 128;
+  l_arm_cmd[3] = 60;
 
   // connect and register the joint state interface
   //wheel
