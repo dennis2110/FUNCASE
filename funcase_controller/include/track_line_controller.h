@@ -15,7 +15,7 @@
 #include <dynamic_reconfigure/server.h>
 #include "funcase_controllers/TrackLinePIDparamConfig.h"
 
-#define SENSOR_REG_COUNT (6)
+#define SENSOR_REG_COUNT (7)
 
 namespace funcase_controllers
 {
@@ -37,7 +37,7 @@ namespace funcase_controllers
 
   private:
     bool read_parameter();
-    void setCommand(uint8_t sensor1,uint8_t sensor2,uint8_t sensor3,uint8_t sensor4,uint8_t sensor5,uint8_t sensor6);
+    void setCommand(uint8_t sensor1,uint8_t sensor2,uint8_t sensor3,uint8_t sensor4,uint8_t sensor5,uint8_t sensor6,uint8_t sensor7);
     void setCommandCB(const std_msgs::UInt8MultiArrayConstPtr& sensor_msg);
     void callback_reconfigure(funcase_controller::TrackLinePIDparamConfig& config, uint32_t level);
 

@@ -61,7 +61,7 @@ void funcase_controllers::TrackLineController::update(const ros::Time &time, con
     //PID big
     turn = (0.13)*static_cast<double>(error_L) + (0)*static_cast<double>(error_sum) + (0)*static_cast<double>(error_dot);
     m_left_wheel.setCommand(-turn);
-    m_right_wheel.setCommand(+turn);
+    m_right_wheel.setCommand(turn);
     std::cout << "left speed->" << -turn << ", right speed->" << turn << std::endl;
 if(ros::Time::now().toSec() - last_time.toSec() > 0.2) {
       if((sensor_data[2] < 30) || (sensor_data[3] < 30)){
@@ -138,18 +138,19 @@ bool funcase_controllers::TrackLineController::read_parameter(){
   return true;
 }
 
-void funcase_controllers::TrackLineController::setCommand(uint8_t sensor1, uint8_t sensor2, uint8_t sensor3, uint8_t sensor4, uint8_t sensor5, uint8_t sensor6){
+void funcase_controllers::TrackLineController::setCommand(uint8_t sensor1, uint8_t sensor2, uint8_t sensor3, uint8_t sensor4, uint8_t sensor5, uint8_t sensor6,uint8_t sensor7){
   sensor_data[0] = sensor1;
   sensor_data[1] = sensor2;
   sensor_data[2] = sensor3;
   sensor_data[3] = sensor4;
   sensor_data[4] = sensor5;
   sensor_data[5] = sensor6;
+  sensor_data[6] = sensor7;
   //ROS_INFO("sensor %d", sensor_data[3]);
 }
 
 void funcase_controllers::TrackLineController::setCommandCB(const std_msgs::UInt8MultiArrayConstPtr &sensor_msg){
-  setCommand(sensor_msg->data.at(0),sensor_msg->data.at(1),sensor_msg->data.at(2),sensor_msg->data.at(3),sensor_msg->data.at(4),sensor_msg->data.at(5));
+  setCommand(sensor_msg->data.at(0),sensor_msg->data.at(1),sensor_msg->data.at(2),sensor_msg->data.at(3),sensor_msg->data.at(4),sensor_msg->data.at(5),sensor_msg->data.at(6));
 }
 
 void funcase_controllers::TrackLineController::callback_reconfigure(funcase_controller::TrackLinePIDparamConfig &config, uint32_t level){

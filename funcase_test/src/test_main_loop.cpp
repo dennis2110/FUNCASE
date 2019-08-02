@@ -13,7 +13,7 @@
 #define SHOW_DEBUG
 
 /****************    Config   *******************/
-#define SENSOR_REG_COUNT (6)
+#define SENSOR_REG_COUNT (7)
 #define SIZE_DATA_RECOARD (10)
 #define CONVERG_THROSHOLD (M_PI * 5.0/180.0)
 
@@ -258,7 +258,7 @@ WBDetector wb_detector;
 void callback_sensor(const std_msgs::UInt8MultiArrayConstPtr& msg)
 {
   const uint8_t* ptr = msg->data.data();
-  for (int i = 0; i < 5; i++) {
+  for (int i = 0; i < 7; i++) {
     sensor_value[i] = ptr[i];
   }
   is_sensor_ready = true;
@@ -951,11 +951,11 @@ bool stage_change_detect(int _stage){
 
 double get_sensor_average() {
     int sum(0);
-    for(int i=0; i<SENSOR_REG_COUNT; i++) {
+    for(int i=0; i<SENSOR_REG_COUNT-1; i++) {
         sum += sensor_value[i];
     }
 
-    return sum / SENSOR_REG_COUNT;
+    return sum / (SENSOR_REG_COUNT-1);
 }
 
 float cot_angle(float _degree) {
