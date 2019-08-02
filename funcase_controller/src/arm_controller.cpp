@@ -11,10 +11,17 @@ funcase_controllers::ArmController::~ArmController(){
 bool funcase_controllers::ArmController::init(hardware_interface::PositionJointInterface *robot, ros::NodeHandle &node){
   m_node = node;
   m_robot = robot;
-  for (int i=0;i<right_arm_joint_num;i++)
-    armcmd_struct.r_arm_pos[i] = 0.0;
-  for (int i=0;i<left_arm_joint_num;i++)
-    armcmd_struct.l_arm_pos[i] = 0.0;
+  
+  armcmd_struct.r_arm_pos[0] = 128.0;
+  armcmd_struct.r_arm_pos[1] = 128.0;
+  armcmd_struct.r_arm_pos[2] = 128.0;
+  armcmd_struct.r_arm_pos[3] = 90.0;
+  armcmd_struct.r_arm_pos[4] = 180.0;
+
+  armcmd_struct.l_arm_pos[0] = 128.0;
+  armcmd_struct.l_arm_pos[1] = 128.0;
+  armcmd_struct.l_arm_pos[2] = 128.0;
+  armcmd_struct.l_arm_pos[3] = 60.0;
 
   if(!read_parameter()) return false;
 
