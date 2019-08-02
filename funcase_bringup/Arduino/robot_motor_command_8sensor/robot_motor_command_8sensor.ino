@@ -12,7 +12,7 @@
 Motor motorR(EN_R, R1, R2);
 Motor motorL(EN_L, L1, L2);
 uint8_t readcmd[5];  
-uint8_t writecmd[10]={ '$', 0x03, 0,0,0,0,0,0, '\r','\n'};
+uint8_t writecmd[11]={ '$', 0x03, 0,0,0,0,0,0,0, '\r','\n'};
 int16_t MotorCMD[4]={0,0,0,0};
 
 void setup() {
@@ -105,6 +105,7 @@ void loop() {
   writecmd[5]= map(analogRead(A3),0,1023,0,255);
   writecmd[6]= map(analogRead(A4),0,1023,0,255);
   writecmd[7]= map(analogRead(A5),0,1023,0,255);
-  Serial.write(writecmd, 10);
+  writecmd[8]= (digitalRead(SEN_R)+(digitalRead(SEN_L)*2));
+  Serial.write(writecmd, 11);
 /////////////////////////////////
 }

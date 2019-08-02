@@ -92,7 +92,7 @@ void FuncaseRobot::read(){
   //cny70[3] = serialdiff.raw_diff[3];
   //cny70[4] = serialdiff.raw_diff[4];
 
-  //ROS_INFO("read cny70 data: %03d %03d %03d %03d",cny70[0],cny70[1],cny70[2],cny70[3]);
+  ROS_INFO("read cny70 data: %03d %03d %03d %03d",cny70[3],cny70[4],cny70[5],cny70[6]);
   //ROS_INFO("read imu data: %4.3f %4.3f %4.3f %4.3f",orientation[0],orientation[1],orientation[2],orientation[3]);
   //ROS_INFO("read diff data: %4.1f %4.1f Mode: %1.1f %1.1f",wheel_vel[0],wheel_vel[1],wheel_eff[0],wheel_eff[1]);
   publish_sensor_data();
@@ -140,6 +140,7 @@ void FuncaseRobot::publish_sensor_data(){
   sensor_msg.data.push_back(normalize(cny70[3], 90, 10));
   sensor_msg.data.push_back(normalize(cny70[4], 110, 10));
   sensor_msg.data.push_back(normalize(cny70[5], 110, 10));
+  sensor_msg.data.push_back(cny70[6]);
 #else
   for (int i=0;i<SENSOR_REG_COUNT;i++) {
     sensor_msg.data.push_back(cny70[i]);
