@@ -43,7 +43,6 @@ void funcase_controllers::TrackLineController::update(const ros::Time &time, con
   
   error = sensor_data[0]*2 + sensor_data[1]*1.5 + sensor_data[2] - sensor_data[3] -sensor_data[4]*1.5 - sensor_data[5]*2;
   
-  
    
   error_sum += error;
   error_dot = error - error_back;
@@ -51,24 +50,33 @@ void funcase_controllers::TrackLineController::update(const ros::Time &time, con
   ROS_INFO("Reconfigure Request:  kP = %f, ki = %f, kD = %f, initspeed = %f",k_p , k_i, k_d, initspeed);
   std::cout << "error->" << error << ", error_sum->" << error_sum << ", error_dot->" << error_dot << std::endl;
   if(!is_usetimer){
-    if((sensor_data[0] < 30) || (sensor_data[5] < 30)){
+    if(sensor_data[6] == 1){
       last_time = ros::Time::now();
       is_usetimer = true;
-      error_L = error;
+      r_speed = 100;
+      l_speed = -100;
+      ROS_INFO("turn RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR");
+    }
+    else if(sensor_data[6] == 2){
+      last_time = ros::Time::now();
+      is_usetimer = true;
+      r_speed = -100.0;
+      l_speed = 100.0;
+      ROS_INFO("turn LLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLl");
     }
   }
   if(is_usetimer){
     //PID big
-    turn = (0.13)*static_cast<double>(error_L) + (0)*static_cast<double>(error_sum) + (0)*static_cast<double>(error_dot);
-    m_left_wheel.setCommand(-turn);
-    m_right_wheel.setCommand(turn);
-    std::cout << "left speed->" << -turn << ", right speed->" << turn << std::endl;
-if(ros::Time::now().toSec() - last_time.toSec() > 0.2) {
+
+    m_left_wheel.setCommand(l_speed);
+    m_right_wheel.setCommand(r_speed);
+    ROS_INFO("turnturnturnturnturnturnturnturnturnturntur");
+    if(ros::Time::now().toSec() - last_time.toSec() > 0.2) {
       if((sensor_data[2] < 30) || (sensor_data[3] < 30)){
-
-
         is_usetimer = false;
-        //is_change = false;
+        m_left_wheel.setCommand(0);
+        m_right_wheel.setCommand(0);
+    ROS_INFO("0000000000000000000000000000000000000000000");
         last_time = ros::Time::now();
       }
     }
@@ -76,8 +84,8 @@ if(ros::Time::now().toSec() - last_time.toSec() > 0.2) {
   }else{
     turn = (k_p)*static_cast<double>(error) + (k_i)*static_cast<double>(error_sum) + (k_d)*static_cast<double>(error_dot);
     m_left_wheel.setCommand(initspeed-turn);
-  m_right_wheel.setCommand(initspeed+turn+10);
-  std::cout << "left speed->" << initspeed-turn << ", right speed->" << initspeed+turn+10 << std::endl;
+  m_right_wheel.setCommand(initspeed+turn+10.0);
+    ROS_INFO("PIDPIDPIDPIDPIDPIDPIDPIDPIDPIDPIDPIDPIDPIDP");
   }
   
   

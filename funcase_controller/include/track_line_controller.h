@@ -74,6 +74,8 @@ namespace funcase_controllers
     int error_back;
     int error_L;
 
+
+    double r_speed, l_speed;
     double initspeed;
     double turn;
     double k_p;
