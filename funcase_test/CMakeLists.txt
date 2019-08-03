@@ -144,6 +144,9 @@ target_link_libraries(lidar_hough_transform ${catkin_LIBRARIES})
 add_executable(test_main_loop	src/test_main_loop.cpp)
 target_link_libraries(test_main_loop ${catkin_LIBRARIES})
 
+add_executable(test_main_loop2	src/test_main_loop2.cpp)
+target_link_libraries(test_main_loop2 ${catkin_LIBRARIES})
+
 add_executable(test_main_loop_start	src/test_main_loop_start.cpp)
 target_link_libraries(test_main_loop_start ${catkin_LIBRARIES})
 

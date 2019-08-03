@@ -19,8 +19,8 @@
 
 #define SWITCH_CONTROLLER_DURATION    (0.2)
 #define turndeg_kp (0.8f)
-#define ORIENT_RIGHT_KP  (5.0f)
-#define ORIENT_RIGHT_KD  (5000.0f)
+#define ORIENT_RIGHT_KP  (150.0f)
+#define ORIENT_RIGHT_KD  (4500.0f)
 
 #define TASK_1_SENSOR_THROSHOLD      (200)
 #define TASK_2_DEG_THROSHOLD         (90.0f)
@@ -290,14 +290,15 @@ void changeControllers(int _stage, ros::ServiceClient* _funcase_client,ros::Serv
   bool dywall_enable(false);
   switch (_stage) {
   case 0:
-    wallrange = right_length; switch_control.request.start_controllers.push_back("move_it_controller");
+    wallrange = 0.61; switch_control.request.start_controllers.push_back("move_it_controller");
     switch_enable = true;
     setzeo_enable = true;
     break;
 
   case 1:
     //         ORIENT_RIGHT_KP              TASK_10_LENGTH_RIGHT
-    error = (wallrange - get_right_distence(cot_angle(yaw)));
+//    error = (wallrange - get_right_distence(cot_angle(yaw)));
+    error = -(cot_angle(yaw)) + (wallrange - get_right_distence(cot_angle(yaw)))*5;
     error_dot = error - error_back;
     error_back= error;
 
@@ -306,7 +307,9 @@ void changeControllers(int _stage, ros::ServiceClient* _funcase_client,ros::Serv
     moveit_msg.data.push_back(100-turn+10);
     pubmsg_enable = true;
 
-    printf("cot_angle: %4.3f\n",cot_angle(yaw));
+    printf("error: %4.3f\n",error);
+    printf("error2: %4.3f\n",wallrange - get_right_distence(cot_angle(yaw)));
+    printf("error dot: %4.3f\n",error_dot);
     printf("turn: %d\n", turn);
     printf("r speed: %d\n", 100+turn);
     printf("l speed: %d\n\n", 100-turn);
@@ -618,7 +621,7 @@ float get_laser_distence(float _angle) {
     else if( _ref_count > laser_count_max)
         _ref_count = laser_count_max;
     ///add 7/29
-    printf("count: %d\n", static_cast<int>(_ref_count));
+    //printf("count: %d\n", static_cast<int>(_ref_count));
     printf("ranges: %4.3f\n", laser_msg.ranges.at(static_cast<size_t>(_ref_count)));
     ///add 7/29
     

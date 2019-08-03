@@ -56,10 +56,14 @@ void funcase_controllers::TrackWallController::update(const ros::Time &time, con
   */ 
 
    //add
+/*
    for(int i =0;i<5;i++){
     printf("lidar[%d]=%4.3f  ",i+1,lidar_value[i]);
    }   
-   printf("\n");/*
+   printf("\n");*/
+
+
+/*
    for(int i =5;i<10;i++){
     printf("lidar[%d]=%4.3f  ",i+75,lidar_value[i+74]);
    }   
@@ -68,10 +72,12 @@ void funcase_controllers::TrackWallController::update(const ros::Time &time, con
     printf("lidar[%d]=%4.3f  ",i+75,lidar_value[i+74]);
    }   
    printf("\n");*/
-   for(int i =164;i<169;i++){
+
+
+   /*for(int i =164;i<169;i++){
     printf("lidar[%d]=%4.3f  ",i+1,lidar_value[i]);
    }   
-   printf("\n");
+   printf("\n");*/
    //add
 
   /*add 7/26*/
@@ -121,14 +127,14 @@ void funcase_controllers::TrackWallController::update(const ros::Time &time, con
   error_back = error;
 
   turn = k_p * error + k_i * error_sum + k_d * error_dot;
-  std::cout << "left speed->" << initspeed - turn << std::endl;
+  /*std::cout << "left speed->" << initspeed - turn << std::endl;
   std::cout << "right speed->" << initspeed + turn << std::endl;
   std::cout << "error->" << error << ", error_dot->" << error_dot << std::endl;
   std::cout << "r_save->" << r_save <<std::endl;
   std::cout << "turn->" << turn << endl;
-printf("\n");
+printf("\n");*/
   m_left_wheel.setCommand(initspeed-turn);
-  m_right_wheel.setCommand(initspeed+turn);
+  m_right_wheel.setCommand(initspeed+turn+10);
 
   
 }

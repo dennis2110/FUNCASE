@@ -38,7 +38,7 @@ bool funcase_controllers::TrackLineController::init(hardware_interface::EffortJo
 }
 
 void funcase_controllers::TrackLineController::update(const ros::Time &time, const ros::Duration &period){
-  ROS_INFO("controller get sensor : %d %d %d %d %d %d",sensor_data[0],sensor_data[1],sensor_data[2],sensor_data[3],sensor_data[4],sensor_data[5]);
+  //ROS_INFO("controller get sensor : %d %d %d %d %d %d",sensor_data[0],sensor_data[1],sensor_data[2],sensor_data[3],sensor_data[4],sensor_data[5]);
   
   
   error = sensor_data[0]*2 + sensor_data[1]*1.5 + sensor_data[2] - sensor_data[3] -sensor_data[4]*1.5 - sensor_data[5]*2;
@@ -47,24 +47,30 @@ void funcase_controllers::TrackLineController::update(const ros::Time &time, con
   error_sum += error;
   error_dot = error - error_back;
   error_back= error;
-  ROS_INFO("Reconfigure Request:  kP = %f, ki = %f, kD = %f, initspeed = %f",k_p , k_i, k_d, initspeed);
-  std::cout << "error->" << error << ", error_sum->" << error_sum << ", error_dot->" << error_dot << std::endl;
+  //ROS_INFO("Reconfigure Request:  kP = %f, ki = %f, kD = %f, initspeed = %f",k_p , k_i, k_d, initspeed);
+  //std::cout << "error->" << error << ", error_sum->" << error_sum << ", error_dot->" << error_dot << std::endl;
+
+  turn = (k_p)*static_cast<double>(error) + (k_i)*static_cast<double>(error_sum) + (k_d)*static_cast<double>(error_dot);
+
   if(!is_usetimer){
     if(sensor_data[6] == 1){
       last_time = ros::Time::now();
       is_usetimer = true;
-      r_speed = 100;
-      l_speed = -100;
+//      r_speed = 110;
+      r_speed = 120;
+      l_speed = -150;
       ROS_INFO("turn RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR");
     }
     else if(sensor_data[6] == 2){
       last_time = ros::Time::now();
       is_usetimer = true;
-      r_speed = -100.0;
-      l_speed = 100.0;
+      r_speed = -150.0;
+//      l_speed = 110.0;
+      l_speed = 120;
       ROS_INFO("turn LLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLl");
     }
   }
+
   if(is_usetimer){
     //PID big
 
@@ -82,7 +88,6 @@ void funcase_controllers::TrackLineController::update(const ros::Time &time, con
     }
     
   }else{
-    turn = (k_p)*static_cast<double>(error) + (k_i)*static_cast<double>(error_sum) + (k_d)*static_cast<double>(error_dot);
     m_left_wheel.setCommand(initspeed-turn);
   m_right_wheel.setCommand(initspeed+turn+10.0);
     ROS_INFO("PIDPIDPIDPIDPIDPIDPIDPIDPIDPIDPIDPIDPIDPIDP");
