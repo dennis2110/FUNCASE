@@ -65,7 +65,7 @@ float front_length(10.0);
 float right_length(10.0);
 float left_length(10.0);
 
-int stage(11);
+int stage(0);
 bool is_call(false);
 
 sensor_msgs::LaserScan laser_msg;
@@ -355,6 +355,15 @@ int main(int argc, char **argv)
       }else if (stage == 17){
         //track wall
         changeControllers(stage, &funcase_client, &IMU_zero_client, &move_it_pub, &dynamic_line_client, &dynamic_wall_client);
+      }else if (stage == 21){
+        //track wall
+        changeControllers(stage, &funcase_client, &IMU_zero_client, &move_it_pub, &dynamic_line_client, &dynamic_wall_client);
+      }else if (stage == 24){
+        //track wall
+        changeControllers(stage, &funcase_client, &IMU_zero_client, &move_it_pub, &dynamic_line_client, &dynamic_wall_client);
+      }else if (stage == 27){
+        //track wall
+        changeControllers(stage, &funcase_client, &IMU_zero_client, &move_it_pub, &dynamic_line_client, &dynamic_wall_client);
       }else if (stage == 5){
         //fuzzy decelerate
         changeControllers(stage, &funcase_client, &IMU_zero_client, &move_it_pub, &dynamic_line_client, &dynamic_wall_client);
@@ -383,7 +392,7 @@ int main(int argc, char **argv)
             stage = 999;
             is_call = false;
           }
-      }else if(stage == 14){
+      }else if(stage == 27){
           if(stage_change_detect(stage)){
             stage = 301;
             is_call = false;
@@ -680,9 +689,10 @@ void changeControllers(int _stage, ros::ServiceClient* _funcase_client,ros::Serv
     switch_control.request.stop_controllers.push_back("move_it_controller");
     switch_control.request.start_controllers.push_back("track_line_controller");
     switch_enable = true;
-    SetLineDynamicParams(&dynamic_msg, 0.8,0.0,4.5,100.0);
+    SetLineDynamicParams(&dynamic_msg, 0.2,0.0,4.7,100.0);
     dynamic_srv.request.config = dynamic_msg;
     dyline_enable = true;
+    
     break;
 
   case 19:
@@ -695,14 +705,15 @@ void changeControllers(int _stage, ros::ServiceClient* _funcase_client,ros::Serv
     switch_control.request.stop_controllers.push_back("track_line_controller");
     switch_control.request.start_controllers.push_back("move_it_controller");
     switch_enable = true;
+    setzeo_enable = true;
     break;
 
   case 21:
-    error = -(cot_angle(yaw)) + (0.39 - get_right_distence(cot_angle(yaw)))*5;
+    error = -(cot_angle(yaw)) + (0.6 - get_right_distence(cot_angle(yaw)))*5;
     error_dot = error - error_back;
     error_back= error;
 
-    turn = static_cast<int16_t>(ORIENT_RIGHT_KP*error + ORIENT_RIGHT_KD*error_dot);
+    turn = static_cast<int16_t>(ORIENT_RIGHT_KP*error + 5000.0*error_dot);
     moveit_msg.data.push_back(100+turn);
     moveit_msg.data.push_back(100-turn+10);
     pubmsg_enable = true;
@@ -711,6 +722,9 @@ void changeControllers(int _stage, ros::ServiceClient* _funcase_client,ros::Serv
   case 22:
     moveit_msg.data.push_back(110);
     moveit_msg.data.push_back(-110);
+//    rotation_Xangle(1,90,&moveit_msg);
+    //moveit_msg.data.push_back(0);
+    //moveit_msg.data.push_back(0);
     pubmsg_enable = true;
     break;
 
@@ -720,6 +734,42 @@ void changeControllers(int _stage, ros::ServiceClient* _funcase_client,ros::Serv
     rotation_Xangle(1,90,&moveit_msg);
     pubmsg_enable = true;
     break;
+  
+  case 24:
+    error = -(cot_angle(yaw-(M_PI *90.0/180.0))) + (0.37 - get_right_distence(cot_angle(yaw-(M_PI *90.0/180.0))))*5;
+    error_dot = error - error_back;
+    error_back= error;
+
+    turn = static_cast<int16_t>(ORIENT_RIGHT_KP*error + ORIENT_RIGHT_KD*error_dot);
+    moveit_msg.data.push_back(100+turn);
+    moveit_msg.data.push_back(100-turn+10);
+    pubmsg_enable = true;
+    break;
+
+  case 25:
+    moveit_msg.data.push_back(110);
+    moveit_msg.data.push_back(-110);
+    pubmsg_enable = true;
+    break;
+
+  case 26:
+    //at M_PI * 90/180 stop
+    //wallrange = right_length;
+    rotation_Xangle(1,90,&moveit_msg);
+    pubmsg_enable = true;
+    break;
+
+  case 27:
+    error = -(cot_angle(yaw-(M_PI *180.0/180.0))) + (0.37 - get_right_distence(cot_angle(yaw-(M_PI *180.0/180.0))))*5;
+    error_dot = error - error_back;
+    error_back= error;
+
+    turn = static_cast<int16_t>(ORIENT_RIGHT_KP*error + ORIENT_RIGHT_KD*error_dot);
+    moveit_msg.data.push_back(100+turn);
+    moveit_msg.data.push_back(100-turn+10);
+    pubmsg_enable = true;
+    break;
+  
   }
 
   if(setzeo_enable)
@@ -1028,7 +1078,7 @@ bool stage_change_detect(int _stage){
       fg_usetimer = true;
     }
     if(fg_usetimer){
-      if((front_length < 1.0f) &&(right_length < 0.6f) && (left_length < 0.6f)) {
+      if((front_length < 1.1f) &&(right_length < 0.65f) && (left_length < 0.6f)) {
         fg_usetimer = false;
         last_time = ros::Time::now();
         return true;
@@ -1052,7 +1102,7 @@ bool stage_change_detect(int _stage){
 
      case 21:
     //scan front
-    if(front_length < 0.3f)
+    if(front_length < 0.6f)
       laser_distence_overlimit_conter++;
     if(laser_distence_overlimit_conter > 2 ) {
       laser_distence_overlimit_conter = 0;
@@ -1063,7 +1113,7 @@ bool stage_change_detect(int _stage){
   case 22:
     // Detect the Orient is stable at 90 degree and no line
     if(!stable_detector.isStarted()) {
-      stable_detector.init(M_PI * 90.0/180);
+      stable_detector.init(M_PI * 100.0/180);
       stable_detector.start();
     } else {
       stable_detector.update();
@@ -1081,13 +1131,82 @@ bool stage_change_detect(int _stage){
       fg_usetimer = true;
     }
     if(fg_usetimer){
-      if(ros::Time::now().toSec() - last_time.toSec() > TASK_15_WAIT_DURATION) {
+      if(ros::Time::now().toSec() - last_time.toSec() > 0.1) {
         fg_usetimer = false;
         last_time = ros::Time::now();
         return true;
       }
     }
     break;
+
+   case 24:
+    //scan front
+    //wait duration
+    if(!fg_usetimer){
+      last_time = ros::Time::now();
+      fg_usetimer = true;
+    }
+    if(fg_usetimer){
+      if(ros::Time::now().toSec() - last_time.toSec() > 1.5f) {
+        if(front_length < 0.73f)
+          laser_distence_overlimit_conter++;
+      }
+    }
+    if(laser_distence_overlimit_conter > 2 ) {
+      laser_distence_overlimit_conter = 0;
+      fg_usetimer = false;
+      return true;
+    }
+    break;
+
+  case 25:
+    // Detect the Orient is stable at 90 degree and no line
+    if(!stable_detector.isStarted()) {
+      stable_detector.init(M_PI * (180.0)/180);
+      stable_detector.start();
+    } else {
+      stable_detector.update();
+    }
+    if(stable_detector.isConverged()) {
+      stable_detector.stop();
+      return true;
+    }
+    break;
+
+  case 26:
+    //wait duration
+    if(!fg_usetimer){
+      last_time = ros::Time::now();
+      fg_usetimer = true;
+    }
+    if(fg_usetimer){
+      if(ros::Time::now().toSec() - last_time.toSec() > 0.1) {
+        fg_usetimer = false;
+        last_time = ros::Time::now();
+        return true;
+      }
+    }
+    break;
+  
+  case 27:
+    //scan front
+    //wait duration
+    if(!fg_usetimer){
+      last_time = ros::Time::now();
+      fg_usetimer = true;
+    }
+    if(fg_usetimer){
+      if(ros::Time::now().toSec() - last_time.toSec() > 1.0f) {
+        if(left_length < 1.0f)
+          laser_distence_overlimit_conter++;
+      }
+    }
+    if(laser_distence_overlimit_conter > 2 ) {
+      laser_distence_overlimit_conter = 0;
+      fg_usetimer = false;
+      return true;
+    }
+
   }
 
 
