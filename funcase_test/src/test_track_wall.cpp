@@ -21,6 +21,8 @@
 #define turndeg_kp (0.8f)
 #define ORIENT_RIGHT_KP  (150.0f)
 #define ORIENT_RIGHT_KD  (4500.0f)
+#define ORIENT_plus_RIGHT_KP  (50.0f)
+#define ORIENT_plus_RIGHT_KD  (700.0f)
 
 #define TASK_1_SENSOR_THROSHOLD      (200)
 #define TASK_2_DEG_THROSHOLD         (90.0f)
@@ -181,13 +183,23 @@ int main(int argc, char **argv)
       }else if (stage == 13) {
         //turn deg control
         changeControllers(stage, &funcase_client, &IMU_zero_client, &move_it_pub, &dynamic_line_client, &dynamic_wall_client);
-      }else if (stage == 4){
+      }else if (stage == 3){
         //fuzzy decelerate
         changeControllers(stage, &funcase_client, &IMU_zero_client, &move_it_pub, &dynamic_line_client, &dynamic_wall_client);
       }
 
       if(stage == 2){
         //stop at stage 15
+      }else if(stage ==0){
+          if(stage_change_detect(stage)){
+            stage = 3;
+            is_call = false;
+          }
+      }else if(stage ==3){
+          if(stage_change_detect(stage)){
+            stage = 2;
+            is_call = false;
+          }
       }else if (stage_change_detect(stage)){
         stage++;
         is_call = false;
@@ -290,7 +302,7 @@ void changeControllers(int _stage, ros::ServiceClient* _funcase_client,ros::Serv
   bool dywall_enable(false);
   switch (_stage) {
   case 0:
-    wallrange = 0.61; switch_control.request.start_controllers.push_back("move_it_controller");
+    wallrange = right_length; switch_control.request.start_controllers.push_back("move_it_controller");
     switch_enable = true;
     setzeo_enable = true;
     break;
@@ -322,7 +334,31 @@ void changeControllers(int _stage, ros::ServiceClient* _funcase_client,ros::Serv
     break;
 
   case 3:
+    error = -(cot_angle(yaw)) + (wallrange - get_right_distence(cot_angle(yaw)))*3;
+    error_dot = error - error_back;
+    error_back= error;
 
+    turn = static_cast<int16_t>(ORIENT_plus_RIGHT_KP*error + ORIENT_plus_RIGHT_KD*error_dot);
+    //moveit_msg.data.push_back(200);
+    //moveit_msg.data.push_back(230);
+    if(turn > 0){
+      moveit_msg.data.push_back(225+turn);
+      moveit_msg.data.push_back(245); 
+      printf("r speed: %d\n", 160+turn);
+      printf("l speed: %d\n\n", 190); 
+    }else{
+      moveit_msg.data.push_back(225);
+      moveit_msg.data.push_back(245-turn);
+      printf("r speed: %d\n", 160);
+      printf("l speed: %d\n\n", 190-turn);
+    }
+    pubmsg_enable = true;
+ 
+    printf("error: %4.3f\n",error);
+    printf("error2: %4.3f\n",wallrange - get_right_distence(cot_angle(yaw)));
+    printf("error dot: %4.3f\n",error_dot);
+    printf("turn: %d\n", turn);
+    
     break;
 
   case 4:
@@ -457,7 +493,7 @@ bool stage_change_detect(int _stage){
       fg_usetimer = true;
     }
     if(fg_usetimer){
-      if(ros::Time::now().toSec() - last_time.toSec() > SWITCH_CONTROLLER_DURATION) {
+      if(ros::Time::now().toSec() - last_time.toSec() > 5.0) {
         fg_usetimer = false;
         last_time = ros::Time::now();
         return true;
