@@ -52,46 +52,81 @@ void funcase_controllers::TrackLineController::update(const ros::Time &time, con
 
   turn = (k_p)*static_cast<double>(error) + (k_i)*static_cast<double>(error_sum) + (k_d)*static_cast<double>(error_dot);
 
-  if(!is_usetimer){
-    if(sensor_data[6] == 1){
-      last_time = ros::Time::now();
-      is_usetimer = true;
-//      r_speed = 110;
-      r_speed = 120;
-      l_speed = -150;
-      ROS_INFO("turn RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR");
-    }
-    else if(sensor_data[6] == 2){
-      last_time = ros::Time::now();
-      is_usetimer = true;
-      r_speed = -150.0;
-//      l_speed = 110.0;
-      l_speed = 120;
-      ROS_INFO("turn LLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLl");
-    }
-  }
 
-  if(is_usetimer){
-    //PID big
-
-    m_left_wheel.setCommand(l_speed);
-    m_right_wheel.setCommand(r_speed);
-    ROS_INFO("turnturnturnturnturnturnturnturnturnturntur");
-    if(ros::Time::now().toSec() - last_time.toSec() > 0.2) {
-      if((sensor_data[2] < 30) || (sensor_data[3] < 30)){
-        is_usetimer = false;
-        m_left_wheel.setCommand(0);
-        m_right_wheel.setCommand(0);
-    ROS_INFO("0000000000000000000000000000000000000000000");
+  if (k_p > 0){
+    if(!is_usetimer){
+      if(sensor_data[6] == 1){
         last_time = ros::Time::now();
+        is_usetimer = true;
+        r_speed = 120;
+        l_speed = -150;
+        ROS_INFO("turn RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR");
+      }
+      else if(sensor_data[6] == 2){
+        last_time = ros::Time::now();
+        is_usetimer = true;
+        r_speed = -150.0;
+        l_speed = 120;
+        ROS_INFO("turn LLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLl");
       }
     }
-    
+
+    if(is_usetimer){
+      m_left_wheel.setCommand(l_speed);
+      m_right_wheel.setCommand(r_speed);
+      ROS_INFO("turnturnturnturnturnturnturnturnturnturntur");
+      if(ros::Time::now().toSec() - last_time.toSec() > 0.2) {
+        if((sensor_data[2] < 30) || (sensor_data[3] < 30)){
+          is_usetimer = false;
+          m_left_wheel.setCommand(0);
+          m_right_wheel.setCommand(0);
+          ROS_INFO("0000000000000000000000000000000000000000000");
+          last_time = ros::Time::now();
+        }
+      }
+    }else{
+      m_left_wheel.setCommand(initspeed-turn);
+      m_right_wheel.setCommand(initspeed+turn+10.0);
+      ROS_INFO("PIDPIDPIDPIDPIDPIDPIDPIDPIDPIDPIDPIDPIDPIDP");
+    }
   }else{
-    m_left_wheel.setCommand(initspeed-turn);
-  m_right_wheel.setCommand(initspeed+turn+10.0);
-    ROS_INFO("PIDPIDPIDPIDPIDPIDPIDPIDPIDPIDPIDPIDPIDPIDP");
+    if(!is_usetimer){
+      if(sensor_data[6] == 2){
+        last_time = ros::Time::now();
+        is_usetimer = true;
+        r_speed = 120;
+        l_speed = -150;
+        ROS_INFO("turn RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR");
+      }
+      else if(sensor_data[6] == 1){
+        last_time = ros::Time::now();
+        is_usetimer = true;
+        r_speed = -150.0;
+        l_speed = 120;
+        ROS_INFO("turn LLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLl");
+      }
+    }
+
+    if(is_usetimer){
+      m_left_wheel.setCommand(l_speed);
+      m_right_wheel.setCommand(r_speed);
+      ROS_INFO("turnturnturnturnturnturnturnturnturnturntur");
+      if(ros::Time::now().toSec() - last_time.toSec() > 0.2) {
+        if((sensor_data[2] > 220) || (sensor_data[3] >220)){
+          is_usetimer = false;
+          m_left_wheel.setCommand(0);
+          m_right_wheel.setCommand(0);
+          ROS_INFO("0000000000000000000000000000000000000000000");
+          last_time = ros::Time::now();
+        }
+      }
+    }else{
+      m_left_wheel.setCommand(initspeed-turn);
+      m_right_wheel.setCommand(initspeed+turn+10.0);
+      ROS_INFO("PIDPIDPIDPIDPIDPIDPIDPIDPIDPIDPIDPIDPIDPIDP");
+    }    
   }
+  
   
   
 }
