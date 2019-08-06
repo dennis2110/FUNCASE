@@ -64,11 +64,13 @@ float laser_count_max;
 
 uint8_t sensor_value[SENSOR_REG_COUNT] = { 0 };
 float yaw(0.0);
+float pitch(0.0);
+float pitch_base(0.0);
 float front_length(10.0);
 float right_length(10.0);
 float left_length(10.0);
 
-int stage(18);
+int stage(0);
 bool is_call(false);
 
 sensor_msgs::LaserScan laser_msg;
@@ -270,6 +272,10 @@ void callback_IMU_yaw(const std_msgs::Float32ConstPtr& msg){
   yaw = msg->data;
   is_imu_ready = true;
 }
+void callback_IMU_pitch(const std_msgs::Float32ConstPtr& msg){
+  pitch = msg->data;
+  //is_imu_ready = true;
+}
 void callback_scan(const sensor_msgs::LaserScan msg){
   // Initial the Laser data at first time received /scan topic
   if( !is_laser_ready ) {
@@ -321,6 +327,8 @@ int main(int argc, char **argv)
       subscribe<std_msgs::UInt8MultiArray>("/track_line_sensor", 50, callback_sensor);
   ros::Subscriber IMU_yaw_sub = node.
       subscribe<std_msgs::Float32>("/imu/yaw", 50, callback_IMU_yaw);
+  ros::Subscriber IMU_pitch_sub = node.
+      subscribe<std_msgs::Float32>("/imu/pitch", 50, callback_IMU_pitch);
   ros::Subscriber scan_sub = node.
       subscribe<sensor_msgs::LaserScan>("/scan", 50, callback_scan);
 
@@ -417,7 +425,12 @@ int main(int argc, char **argv)
             stage = 17;
             is_call = false;
           }
-      }else if(stage == 28){
+      }else if(stage == 27){
+        if(stage_change_detect(stage)){
+            stage = 29;
+            is_call = false;
+          }
+      }else if(stage == 31){
         if(stage_change_detect(stage)){
             stage = 301;
             is_call = false;
@@ -431,7 +444,8 @@ int main(int argc, char **argv)
     ///////////////////////////////////////////////////////
     }//end if imu_ready
 #ifdef SHOW_DEBUG
-    ROS_INFO("yaw: %4.3f",yaw);
+    ROS_INFO("sensor_value[6]: %d",sensor_value[6]);
+    ROS_INFO("yaw: %4.3f pitch: %4.3f",yaw,pitch);
     ROS_INFO("stage: %d",stage);
     ROS_INFO("right_length: %4.3f front_length: %4.3f left_length: %4.3f",right_length,front_length,left_length);
 #endif
@@ -739,6 +753,7 @@ void changeControllers(int _stage, ros::ServiceClient* _funcase_client,ros::Serv
     pubmsg_enable = true;
     wallrange = right_length;
     setzeo_enable = true;
+    pitch_base = pitch;
     break;
 
   case 16:
@@ -761,16 +776,8 @@ void changeControllers(int _stage, ros::ServiceClient* _funcase_client,ros::Serv
       printf("l speed: %d\n\n", 190-turn);
     }
     pubmsg_enable = true;
-
-    /*error = -(cot_angle(yaw-(M_PI *90.0/180.0))) + (0.39 - get_right_distence(cot_angle(yaw-(M_PI *90.0/180.0))))*5;
-    //error = (0.39 - get_right_distence(cot_angle(yaw -(M_PI *90.0/180.0))));
-    error_dot = error - error_back;
-    error_back= error;
-
-    turn = static_cast<int16_t>(ORIENT_RIGHT_KP*error + ORIENT_RIGHT_KD*error_dot);
-    moveit_msg.data.push_back(100+turn);
-    moveit_msg.data.push_back(100-turn);
-    pubmsg_enable = true;*/
+   
+    
     break;
 
   case 17:
@@ -933,7 +940,7 @@ void changeControllers(int _stage, ros::ServiceClient* _funcase_client,ros::Serv
     switch_control.request.stop_controllers.push_back("move_it_controller");
     switch_control.request.start_controllers.push_back("track_line_controller");
     switch_enable = true;
-    SetLineDynamicParams(&dynamic_msg, -0.2,0.0,-4.7,100.0);
+    SetLineDynamicParams(&dynamic_msg, -0.2,0.0,-4.7,255.0);
     dynamic_srv.request.config = dynamic_msg;
     dyline_enable = true;
     
@@ -969,6 +976,7 @@ void changeControllers(int _stage, ros::ServiceClient* _funcase_client,ros::Serv
 bool stage_change_detect(int _stage){
   // Count the times of robot distence over minimum limit
   static int laser_distence_overlimit_conter(0);
+  static int pitch_counter(0);
   static bool fg_usetimer(false);
   static ros::Time last_time = ros::Time::now();
 
@@ -1250,14 +1258,31 @@ bool stage_change_detect(int _stage){
   case 16:
     //change controller duration
     //wait duration
-    if(!fg_usetimer){
+    /*if(!fg_usetimer){
+      pitch_base = pitch;
       last_time = ros::Time::now();
       fg_usetimer = true;
     }
     if(fg_usetimer){
-      if(ros::Time::now().toSec() - last_time.toSec() > TASK_16_WAIT_DURATION) {
+      if(std::fabs(pitch - pitch_base) > 1.0f) {
+       pitch_counter++;
+      }
+    }
+    if(pitch_counter > 2 ) {
+      pitch_counter = 0;
+      fg_usetimer = false;
+      last_time = ros::Time::now();
+      error_dot = 0.0;
+      error_back= 0.0;
+      return true;
+    }*/
+    if(!fg_usetimer && (pitch < -2.0))
+      fg_usetimer = true;
+    if(fg_usetimer){
+//      if(pitch > -1.0){
+      printf("pitch %4.3f***************************\n",pitch);
+      if(pitch>-2.0){
         fg_usetimer = false;
-        last_time = ros::Time::now();
         error_dot = 0.0;
         error_back= 0.0;
         return true;
@@ -1267,7 +1292,7 @@ bool stage_change_detect(int _stage){
 
   case 17:
     //sensor all black
-    if(get_sensor_average() > 220){
+    if(std::abs(pitch) >= 2){
       error_dot = 0.0;
       error_back= 0.0;
       return true;
@@ -1421,11 +1446,9 @@ bool stage_change_detect(int _stage){
       fg_usetimer = true;
     }
     if(fg_usetimer){
-      if(ros::Time::now().toSec() - last_time.toSec() > 2.5f) {
+      if(sensor_value[6] == 0) {
         fg_usetimer = false;
         last_time = ros::Time::now();
-        error_dot = 0.0;
-        error_back= 0.0;
         return true;
       }
     }
