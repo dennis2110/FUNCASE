@@ -70,7 +70,7 @@ float front_length(10.0);
 float right_length(10.0);
 float left_length(10.0);
 
-int stage(31);
+int stage(0);
 bool is_call(false);
 
 sensor_msgs::LaserScan laser_msg;
@@ -309,7 +309,7 @@ void callback_scan(const sensor_msgs::LaserScan msg){
 
 int main(int argc, char **argv)
 {
-  ros::init(argc, argv, "test_main_loop3");
+  ros::init(argc, argv, "test_main_loop4");
   ros::NodeHandle node;
 
   /********************************** Client **********************************/
@@ -449,7 +449,7 @@ int main(int argc, char **argv)
             stage = 99929;
             is_call = false;
           }
-      }else if(stage == 28){
+      }else if(stage == 20){
         if(stage_change_detect(stage)){
             stage = 301;
             is_call = false;

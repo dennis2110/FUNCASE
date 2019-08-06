@@ -150,6 +150,9 @@ target_link_libraries(test_main_loop2 ${catkin_LIBRARIES})
 add_executable(test_main_loop3	src/test_main_loop3.cpp)
 target_link_libraries(test_main_loop3 ${catkin_LIBRARIES})
 
+add_executable(test_main_loop4	src/test_main_loop4.cpp)
+target_link_libraries(test_main_loop4 ${catkin_LIBRARIES})
+
 add_executable(test_main_loop_start	src/test_main_loop_start.cpp)
 target_link_libraries(test_main_loop_start ${catkin_LIBRARIES})
 
