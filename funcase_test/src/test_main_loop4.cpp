@@ -76,7 +76,7 @@ float front_length(10.0);
 float right_length(10.0);
 float left_length(10.0);
 
-int stage(0);
+int stage(31);
 bool is_call(false);
 
 sensor_msgs::LaserScan laser_msg;
@@ -469,7 +469,7 @@ int main(int argc, char **argv)
             stage = 34;
             is_call = false;
           }
-      }else if(stage == 3){
+      }else if(stage == 38){
         if(stage_change_detect(stage)){
             stage = 301;
             is_call = false;
@@ -1803,7 +1803,7 @@ bool stage_change_detect(int _stage){
       fg_usetimer = true;
     }
     if(fg_usetimer){
-      if((ros::Time::now().toSec() - last_time.toSec() > 0.3f)){
+      if((ros::Time::now().toSec() - last_time.toSec() > 0.1f)){
         fg_usetimer = false;
         last_time = ros::Time::now();
         return true;
@@ -1831,7 +1831,7 @@ bool stage_change_detect(int _stage){
       fg_usetimer = true;
     }
     if(fg_usetimer){
-      if(ros::Time::now().toSec() - last_time.toSec() > 1.0f) {
+      if(ros::Time::now().toSec() - last_time.toSec() > 0.2f) {
         fg_usetimer = false;
         last_time = ros::Time::now();
         error_dot = 0.0;
