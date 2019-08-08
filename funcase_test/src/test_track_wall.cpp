@@ -20,7 +20,7 @@
 #define SWITCH_CONTROLLER_DURATION    (0.2)
 #define turndeg_kp (0.8f)
 #define ORIENT_RIGHT_KP  (150.0f)
-#define ORIENT_RIGHT_KD  (4500.0f)
+#define ORIENT_RIGHT_KD  (3400.0f)
 #define ORIENT_plus_RIGHT_KP  (50.0f)
 #define ORIENT_plus_RIGHT_KD  (700.0f)
 
@@ -186,16 +186,19 @@ int main(int argc, char **argv)
       }else if (stage == 3){
         //fuzzy decelerate
         changeControllers(stage, &funcase_client, &IMU_zero_client, &move_it_pub, &dynamic_line_client, &dynamic_wall_client);
+      }else if (stage == 4){
+        //fuzzy decelerate
+        changeControllers(stage, &funcase_client, &IMU_zero_client, &move_it_pub, &dynamic_line_client, &dynamic_wall_client);
       }
 
       if(stage == 2){
         //stop at stage 15
       }else if(stage ==0){
           if(stage_change_detect(stage)){
-            stage = 3;
+            stage = 4;
             is_call = false;
           }
-      }else if(stage ==3){
+      }else if(stage ==4){
           if(stage_change_detect(stage)){
             stage = 2;
             is_call = false;
@@ -211,6 +214,7 @@ int main(int argc, char **argv)
 #ifdef SHOW_DEBUG
     ROS_INFO("yaw: %4.3f",yaw);
     ROS_INFO("stage: %d",stage);
+    ROS_INFO("right_length: %4.3f front_length: %4.3f left_length: %4.3f",right_length,front_length,left_length);
 #endif
     ros::spinOnce();
     r.sleep();
@@ -310,7 +314,7 @@ void changeControllers(int _stage, ros::ServiceClient* _funcase_client,ros::Serv
   case 1:
     //         ORIENT_RIGHT_KP              TASK_10_LENGTH_RIGHT
 //    error = (wallrange - get_right_distence(cot_angle(yaw)));
-    error = -(cot_angle(yaw)) + (wallrange - get_right_distence(cot_angle(yaw)))*5;
+    error = -(cot_angle(yaw)) + (0.4 - get_right_distence(cot_angle(yaw)))*5;
     error_dot = error - error_back;
     error_back= error;
 
@@ -362,13 +366,20 @@ void changeControllers(int _stage, ros::ServiceClient* _funcase_client,ros::Serv
     break;
 
   case 4:
-    double speed;
-    speed = static_cast<double>(front_length * 100);
-    if(speed > 130.0)
-      speed = 130.0;
-    SetLineDynamicParams(&dynamic_msg, 0.2,0.0,4.5,130.0);
-    dynamic_srv.request.config = dynamic_msg;
-    dyline_enable = true;
+    error = -get_right_distence(cot_angle(yaw)) + get_left_distence(cot_angle(yaw));
+    error_dot = error - error_back;
+    error_back= error;
+
+    printf("error -> %4.3f\n", error);
+    turn = static_cast<int16_t>(50.0*error + 15000*error_dot);
+
+    moveit_msg.data.push_back(100+turn);
+    moveit_msg.data.push_back(100-turn+25);
+    pubmsg_enable = true;
+    printf("right_D -> %4.3f\n", get_right_distence(cot_angle(yaw)));
+    printf("left_D -> %4.3f\n", get_left_distence(cot_angle(yaw)));
+    printf("l speed: %d\n", 100+turn);
+    printf("r speed: %d\n\n", 100-turn);
     break;
 
   case 5:
@@ -503,8 +514,17 @@ bool stage_change_detect(int _stage){
 
   case 4:
     //sensor almost white
-    if(get_sensor_average() < TASK_4_SENSOR_THROSHOLD)
-      return true;
+    if(!fg_usetimer){
+      last_time = ros::Time::now();
+      fg_usetimer = true;
+    }
+    if(fg_usetimer){
+      if(ros::Time::now().toSec() - last_time.toSec() > 5.0f) {
+        fg_usetimer = false;
+        last_time = ros::Time::now();
+        return true;
+      }
+    }
     break;
 
   case 5:

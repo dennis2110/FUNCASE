@@ -60,6 +60,7 @@ void funcase_controllers::TrackLineController::update(const ros::Time &time, con
         is_usetimer = true;
         r_speed = 120;
         l_speed = -150;
+        
         ROS_INFO("turn RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR");
       }
       else if(sensor_data[6] == 2){
@@ -67,6 +68,7 @@ void funcase_controllers::TrackLineController::update(const ros::Time &time, con
         is_usetimer = true;
         r_speed = -150.0;
         l_speed = 120;
+       
         ROS_INFO("turn LLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLl");
       }
     }

@@ -18,21 +18,19 @@
 #define CONVERG_THROSHOLD (M_PI * 1.0/180.0)
 
 #define SWITCH_CONTROLLER_DURATION    (0.2)
-#define turndeg_kp (20.0f)
-#define turndeg_ki (1.0f)
-#define turndeg_kd (350.0f)
+#define turndeg_kp (40.0f)
+#define turndeg_kd (180.0f)
 #define DECELERATION_KP  (40)
-#define ORIENT_RIGHT_KP  (150.0f)
-#define ORIENT_RIGHT_KD  (4000.0f)
+#define ORIENT_RIGHT_KP  (130.0f)
+#define ORIENT_RIGHT_KD  (3400.0f)
 #define ORIENT_plus_RIGHT_KP  (50.0f)
 #define ORIENT_plus_RIGHT_KD  (700.0f)
-
 
 #define TASK_1_WAIT_DURATION         (1.0)
 #define TASK_2_WAIT_DURATION         (1.2)
 #define TASK_3_WAIT_DURATION         (0.5)
 #define TASK_8_WAIT_DURATION         (0.1)
-#define TASK_15_WAIT_DURATION        (2.0)
+#define TASK_15_WAIT_DURATION        (0.2)
 #define TASK_16_WAIT_DURATION        (2.5)
 #define TASK_17_WAIT_DURATION        (1.0)
 
@@ -50,11 +48,7 @@ int16_t turn;
 float error;
 float error_dot = 0.0;
 float error_back = 0.0;
-long error_sum = 0.0;
 float wallrange = 0.0;
-float case1_Lspeed = 130.0;
-float case1_Rspeed = 130.0;
-
 
 double speed;
 double back_speed = 0.0;
@@ -76,7 +70,8 @@ float front_length(10.0);
 float right_length(10.0);
 float left_length(10.0);
 
-int stage(31);
+int stage(20);
+
 bool is_call(false);
 
 sensor_msgs::LaserScan laser_msg;
@@ -344,6 +339,10 @@ int main(int argc, char **argv)
 
 
   ros::Rate r(30);
+
+  printf("set stage:\n");  
+  scanf("%d",&stage);
+
   while (ros::ok())
   {
     //if(is_sensor_ready && is_laser_ready){
@@ -363,32 +362,38 @@ int main(int argc, char **argv)
     ///////////////////////////////////////////////////////
     ///////////// repeat changeControllers() //////////////
     ///////////////////////////////////////////////////////
-      if(stage == 12){
+      if(stage == 2){
+        //turn deg
+        changeControllers(stage, &funcase_client, &IMU_zero_client, &move_it_pub, &dynamic_line_client, &dynamic_wall_client);
+      }else if (stage == 5){
+        //fuzzy decelerate
+        changeControllers(stage, &funcase_client, &IMU_zero_client, &move_it_pub, &dynamic_line_client, &dynamic_wall_client);
+      }else if(stage == 12){
         //track wall
         changeControllers(stage, &funcase_client, &IMU_zero_client, &move_it_pub, &dynamic_line_client, &dynamic_wall_client);
-      }else if (stage == 1) {
-        //track wall (slope up)
+      }else if (stage == 14){
+        //turn deg
         changeControllers(stage, &funcase_client, &IMU_zero_client, &move_it_pub, &dynamic_line_client, &dynamic_wall_client);
       }else if (stage == 16) {
         //track wall (slope up)
         changeControllers(stage, &funcase_client, &IMU_zero_client, &move_it_pub, &dynamic_line_client, &dynamic_wall_client);
       }else if (stage == 17){
-        //track wall
+        //track wall (on slope)
         changeControllers(stage, &funcase_client, &IMU_zero_client, &move_it_pub, &dynamic_line_client, &dynamic_wall_client);
       }else if (stage == 171){
-        //slope down
-        changeControllers(stage, &funcase_client, &IMU_zero_client, &move_it_pub, &dynamic_line_client, &dynamic_wall_client);
-      }else if (stage == 999){
-        //find line
+        //track wall (slope down)
         changeControllers(stage, &funcase_client, &IMU_zero_client, &move_it_pub, &dynamic_line_client, &dynamic_wall_client);
       }else if (stage == 21){
-        //track wall
+        //
         changeControllers(stage, &funcase_client, &IMU_zero_client, &move_it_pub, &dynamic_line_client, &dynamic_wall_client);
-      }else if (stage == 19){
-        //track wall
+      }else if (stage == 22){
+        //
         changeControllers(stage, &funcase_client, &IMU_zero_client, &move_it_pub, &dynamic_line_client, &dynamic_wall_client);
       }else if (stage == 24){
-        //track wall
+        //
+        changeControllers(stage, &funcase_client, &IMU_zero_client, &move_it_pub, &dynamic_line_client, &dynamic_wall_client);
+      }else if (stage == 25){
+        //
         changeControllers(stage, &funcase_client, &IMU_zero_client, &move_it_pub, &dynamic_line_client, &dynamic_wall_client);
       }else if (stage == 27){
         //track wall (slope up)
@@ -396,22 +401,40 @@ int main(int argc, char **argv)
       }else if (stage == 28){
         //track wall (on slope)
         changeControllers(stage, &funcase_client, &IMU_zero_client, &move_it_pub, &dynamic_line_client, &dynamic_wall_client);
-      }else if (stage == 14){
-        //turn deg
+      }else if (stage == 291){
+        //find black line
         changeControllers(stage, &funcase_client, &IMU_zero_client, &move_it_pub, &dynamic_line_client, &dynamic_wall_client);
-      }else if (stage == 5){
-        //fuzzy decelerate
+      }else if (stage == 2293){
+        //black line ing
         changeControllers(stage, &funcase_client, &IMU_zero_client, &move_it_pub, &dynamic_line_client, &dynamic_wall_client);
-      }else if (stage == 22){
-        //fuzzy decelerate
+      }else if (stage == 294){
+        //decelerate (slope down)
         changeControllers(stage, &funcase_client, &IMU_zero_client, &move_it_pub, &dynamic_line_client, &dynamic_wall_client);
-      }else if (stage == 25){
-        //fuzzy decelerate
+      }else if (stage == 301){
+        //find S start
+        changeControllers(stage, &funcase_client, &IMU_zero_client, &move_it_pub, &dynamic_line_client, &dynamic_wall_client);
+      }else if (stage == 302){
+        //on white line
+        changeControllers(stage, &funcase_client, &IMU_zero_client, &move_it_pub, &dynamic_line_client, &dynamic_wall_client);
+      }else if (stage == 201){
+        //on white line
+        changeControllers(stage, &funcase_client, &IMU_zero_client, &move_it_pub, &dynamic_line_client, &dynamic_wall_client);
+      }else if (stage == 19){
+        //on white line
+        changeControllers(stage, &funcase_client, &IMU_zero_client, &move_it_pub, &dynamic_line_client, &dynamic_wall_client);
+      }else if (stage == 191){
+        //on white line
+        changeControllers(stage, &funcase_client, &IMU_zero_client, &move_it_pub, &dynamic_line_client, &dynamic_wall_client);
+      }else if (stage == 192){
+        //on white line
+        changeControllers(stage, &funcase_client, &IMU_zero_client, &move_it_pub, &dynamic_line_client, &dynamic_wall_client);
+      }else if (stage == 193){
+        //on white line
+        changeControllers(stage, &funcase_client, &IMU_zero_client, &move_it_pub, &dynamic_line_client, &dynamic_wall_client);
+      }else if (stage == 194){
+        //on white line
         changeControllers(stage, &funcase_client, &IMU_zero_client, &move_it_pub, &dynamic_line_client, &dynamic_wall_client);
       }else if (stage == 36){
-        //fuzzy decelerate
-        changeControllers(stage, &funcase_client, &IMU_zero_client, &move_it_pub, &dynamic_line_client, &dynamic_wall_client);
-      }else if (stage == 2){
         //turn deg
         changeControllers(stage, &funcase_client, &IMU_zero_client, &move_it_pub, &dynamic_line_client, &dynamic_wall_client);
       }
@@ -422,11 +445,21 @@ int main(int argc, char **argv)
     ///////////////////////////////////////////////////////
     ////////////// check and change stage /////////////////
     ///////////////////////////////////////////////////////
-      if(stage == 50){
+      if(stage == 39){
         //stop at stage 3
       }else if(stage ==5){
           if(stage_change_detect(stage)){
             stage = 11;
+            is_call = false;
+          }
+      }else if(stage ==2){
+          if(stage_change_detect(stage)){
+            stage = 201;
+            is_call = false;
+          }
+      }else if(stage ==201){
+          if(stage_change_detect(stage)){
+            stage = 4;
             is_call = false;
           }
       }else if(stage == 12){
@@ -446,7 +479,22 @@ int main(int argc, char **argv)
           }
       }else if(stage == 27){
         if(stage_change_detect(stage)){
-            stage = 271;
+            stage = 291;
+            is_call = false;
+          }
+      }else if(stage == 302){
+        if(stage_change_detect(stage)){
+            stage = 31;
+            is_call = false;
+          }
+      }else if(stage == 19){
+        if(stage_change_detect(stage)){
+            stage = 191;
+            is_call = false;
+          }
+      }else if(stage == 194){
+        if(stage_change_detect(stage)){
+            stage = 20;
             is_call = false;
           }
       }else if(stage == 999){
@@ -454,24 +502,14 @@ int main(int argc, char **argv)
             stage = 999;
             is_call = false;
           }
-      }else if(stage == 99928){
+      }else if(stage == 999){
         if(stage_change_detect(stage)){
-            stage = 30;
+            stage = 666;
             is_call = false;
           }
-      }else if(stage == 99927){
+      }else if(stage == 26){
         if(stage_change_detect(stage)){
-            stage = 99929;
-            is_call = false;
-          }
-      }else if(stage == 32){
-        if(stage_change_detect(stage)){
-            stage = 34;
-            is_call = false;
-          }
-      }else if(stage == 38){
-        if(stage_change_detect(stage)){
-            stage = 301;
+            stage = 666;
             is_call = false;
           }
       }else if(stage_change_detect(stage)){
@@ -592,38 +630,48 @@ void changeControllers(int _stage, ros::ServiceClient* _funcase_client,ros::Serv
 
   case 1:
     //move farward
-    printf("L -> %f, R -> %f\n",case1_Lspeed,  case1_Rspeed);
-    moveit_msg.data.push_back(case1_Lspeed);
-    moveit_msg.data.push_back(case1_Rspeed);
+    moveit_msg.data.push_back(100);
+    moveit_msg.data.push_back(110);
     pubmsg_enable = true;
     break;
 
   case 2:
     //turn right
-    error = -cot_angle(yaw-(M_PI *-90.0/180.0));
+    //moveit_msg.data.push_back(-120);
+    //moveit_msg.data.push_back(120);
+
+    error = -cot_angle(yaw-(M_PI *(-90.0)/180.0));
     error_dot = error - error_back;
     error_back= error;
-    error_sum += error;
-    turn = static_cast<int16_t>(turndeg_kp*error + turndeg_kd*error_dot + turndeg_ki * error_sum);
-
+    turn = static_cast<int16_t>(turndeg_kp*error + turndeg_kd*error_dot);
     if(turn > 0){
-      moveit_msg.data.push_back(turn+110);
+      moveit_msg.data.push_back(turn+100);
       moveit_msg.data.push_back(-turn-125);
       printf("l speed: %d\n", turn+100);
-      printf("r speed: %d\n", -turn-100);
+      printf("r speed: %d\n", -turn-125);
     }else{
-      moveit_msg.data.push_back(turn-110);
+      moveit_msg.data.push_back(turn-100);
       moveit_msg.data.push_back(-turn+125);
       printf("l speed: %d\n", turn-100);
-      printf("r speed: %d\n", -turn+100);
+      printf("r speed: %d\n", -turn+125);
     }
-
     printf("error: %4.3f\n",error);
     printf("error dot: %4.3f\n",error_dot);
     printf("turn: %d\n", turn);
     pubmsg_enable = true;
     break;
 
+  case 201:
+    error = -(cot_angle(yaw - (M_PI *(-90.0)/180.0))) + (0.6f - get_right_distence(cot_angle(yaw - (M_PI *(-90.0)/180.0))))*5;
+    error_dot = error - error_back;
+    error_back= error;
+
+    turn = static_cast<int16_t>(ORIENT_RIGHT_KP*error + ORIENT_RIGHT_KD*error_dot);
+    moveit_msg.data.push_back(100+turn);
+    moveit_msg.data.push_back(100-turn+25);
+    pubmsg_enable = true;
+
+    break;
   case 3:
     //move farward
     moveit_msg.data.push_back(140);
@@ -631,13 +679,13 @@ void changeControllers(int _stage, ros::ServiceClient* _funcase_client,ros::Serv
     pubmsg_enable = true;
     break;
 
-  case 301:
+  case 666:
     moveit_msg.data.push_back(0);
     moveit_msg.data.push_back(0);
     pubmsg_enable = true;
     break;
 
-  case 302:
+  case 667:
     moveit_msg.data.push_back(200);
     moveit_msg.data.push_back(255);
     pubmsg_enable = true;
@@ -654,7 +702,8 @@ void changeControllers(int _stage, ros::ServiceClient* _funcase_client,ros::Serv
     back_speed = 200.0;
     break;
 
-  case 5:
+  case 5: 
+
     //dynamic deceleration (line)
     if(isnan(front_length)){
       speed = back_speed;
@@ -664,17 +713,14 @@ void changeControllers(int _stage, ros::ServiceClient* _funcase_client,ros::Serv
     if(speed > 200.0)
       speed = 200.0;
     if(speed < 60.0)
-      speed = 60.0;
-    if(speed == 60.0)
-      SetLineDynamicParams(&dynamic_msg, 0.2,0.0,4.5,speed);
-    else
-      SetLineDynamicParams(&dynamic_msg, 0.2,0.0,4.5,speed);
+      speed = 60.0;  
+    SetLineDynamicParams(&dynamic_msg, 0.2,0.0,4.5,speed);
     dynamic_srv.request.config = dynamic_msg;
     dyline_enable = true;
     back_speed = speed;
     break;
 
-  case 6:
+/*  case 6:
     //start moveit controller
     switch_control.request.stop_controllers.push_back("track_line_controller");
     switch_control.request.start_controllers.push_back("move_it_controller");
@@ -718,7 +764,7 @@ void changeControllers(int _stage, ros::ServiceClient* _funcase_client,ros::Serv
     dynamic_srv.request.config = dynamic_msg;
     dyline_enable = true;
     back_speed = speed;
-    break;
+    break;*/
 
   case 11:
     //start trackwall controller, set trackwall params
@@ -731,16 +777,6 @@ void changeControllers(int _stage, ros::ServiceClient* _funcase_client,ros::Serv
     break;
 
   case 12:
-    //dynamic deceleration (wall)
-    /*if(isnan(front_length)){
-      speed = back_speed;
-    }else {
-      speed = static_cast<double>(front_length * DECELERATION_KP);
-    }
-    if(speed > 130.0)
-      speed = 130.0;
-    if(speed < 100.0)
-      speed = 100.0;*/
     //         ORIENT_RIGHT_KP              TASK_10_LENGTH_RIGHT
     error = -(cot_angle(yaw)) + (wallrange - get_right_distence(cot_angle(yaw)))*5;
     error_dot = error - error_back;
@@ -765,16 +801,15 @@ void changeControllers(int _stage, ros::ServiceClient* _funcase_client,ros::Serv
     error = -cot_angle(yaw-(M_PI *90.0/180.0));
     error_dot = error - error_back;
     error_back= error;
-    error_sum += error;
-    turn = static_cast<int16_t>(turndeg_kp*error + turndeg_kd*error_dot + turndeg_ki * error_sum);
+    turn = static_cast<int16_t>(turndeg_kp*error + turndeg_kd*error_dot);
 
     if(turn > 0){
-      moveit_msg.data.push_back(turn+110);
+      moveit_msg.data.push_back(turn+100);
       moveit_msg.data.push_back(-turn-125);
       printf("l speed: %d\n", turn+100);
       printf("r speed: %d\n", -turn-100);
     }else{
-      moveit_msg.data.push_back(turn-110);
+      moveit_msg.data.push_back(turn-100);
       moveit_msg.data.push_back(-turn+125);
       printf("l speed: %d\n", turn-100);
       printf("r speed: %d\n", -turn+100);
@@ -783,6 +818,7 @@ void changeControllers(int _stage, ros::ServiceClient* _funcase_client,ros::Serv
     printf("error: %4.3f\n",error);
     printf("error dot: %4.3f\n",error_dot);
     printf("turn: %d\n", turn);
+
     pubmsg_enable = true;
     break;
 
@@ -821,8 +857,7 @@ void changeControllers(int _stage, ros::ServiceClient* _funcase_client,ros::Serv
     break;
 
   case 17:
-    error = -(cot_angle(yaw)) + (wallrange - get_right_distence(cot_angle(yaw)))*5;
-    //error = (0.39 - get_right_distence(cot_angle(yaw -(M_PI *90.0/180.0))));
+    error = -(cot_angle(yaw)) + (0.4 - get_right_distence(cot_angle(yaw)))*5;
     error_dot = error - error_back;
     error_back= error;
 
@@ -830,7 +865,7 @@ void changeControllers(int _stage, ros::ServiceClient* _funcase_client,ros::Serv
     moveit_msg.data.push_back(75+turn);
     moveit_msg.data.push_back(75-turn+10);
     pubmsg_enable = true;
-    break;
+    break;   
 
   case 171:
     //slope down
@@ -846,11 +881,11 @@ void changeControllers(int _stage, ros::ServiceClient* _funcase_client,ros::Serv
 
   case 172:
     if(yaw > 0 ){
-      moveit_msg.data.push_back(-100);
+      moveit_msg.data.push_back(-150);
       moveit_msg.data.push_back(100);
     }else{
       moveit_msg.data.push_back(100);
-      moveit_msg.data.push_back(-100);
+      moveit_msg.data.push_back(-150);
     }
     
     pubmsg_enable = true;
@@ -860,43 +895,83 @@ void changeControllers(int _stage, ros::ServiceClient* _funcase_client,ros::Serv
     switch_control.request.stop_controllers.push_back("move_it_controller");
     switch_control.request.start_controllers.push_back("track_line_controller");
     switch_enable = true;
-    SetLineDynamicParams(&dynamic_msg, 0.2,0.0,4.7,90.0);
+    SetLineDynamicParams(&dynamic_msg, 0.2,0.0,4.7,100.0);
     dynamic_srv.request.config = dynamic_msg;
     dyline_enable = true;
-    
     break;
 
-  case 19:
-    if(isnan(front_length)){
-      speed = 70.0;
+  case 19:       
+    
+    back_speed = 200;
+    break;
+  
+  case 191:
+     if(isnan(front_length)){
+      speed = back_speed;
     }else {
-      turn = static_cast<double>((front_length) * 50);
+      speed = static_cast<double>(front_length * 25);
     }
-    speed = 150.0;
-    printf("turn -> %d\n", turn);
-    printf("speed -> %f\n", speed);
     if(speed > 200.0)
       speed = 200.0;
     if(speed < 70.0)
-      speed = 70.0;
-    if(speed == 70.0)
-      SetLineDynamicParams(&dynamic_msg, 0.2,0.0,4.5,speed);
-    else
-      SetLineDynamicParams(&dynamic_msg, 0.2,0.0,4.5,speed);
+      speed = 70.0;   
+    SetLineDynamicParams(&dynamic_msg, 0.2,0.0,4.5,speed);
     dynamic_srv.request.config = dynamic_msg;
     dyline_enable = true;
+    back_speed = speed;
+
+    break;    
+ 
+ case 192:
+     if(isnan(front_length)){
+      speed = back_speed;
+    }else {
+      speed = static_cast<double>(front_length * 23);
+    }
+    if(speed > 200.0)
+      speed = 200.0;
+    if(speed < 70.0)
+      speed = 70.0;   
+    SetLineDynamicParams(&dynamic_msg, 0.2,0.0,4.5,speed);
+    dynamic_srv.request.config = dynamic_msg;
+    dyline_enable = true;
+    back_speed = speed;
 
     break;
 
+  case 193:
+    SetLineDynamicParams(&dynamic_msg, 0.2,0.0,4.7,70.0);
+    dynamic_srv.request.config = dynamic_msg;
+    dyline_enable = true;
+    break;   
+
+  case 194:
+     if(isnan(front_length)){
+      speed = back_speed;
+    }else {
+      speed = static_cast<double>(front_length * 75);
+    }
+    if(speed > 200.0)
+      speed = 200.0;
+    if(speed < 70.0)
+      speed = 70.0;   
+    SetLineDynamicParams(&dynamic_msg, 0.2,0.0,4.5,speed);
+    dynamic_srv.request.config = dynamic_msg;
+    dyline_enable = true;
+    back_speed = speed;
+
+    break; 
+  
   case 20:
     switch_control.request.stop_controllers.push_back("track_line_controller");
     switch_control.request.start_controllers.push_back("move_it_controller");
     switch_enable = true;
     setzeo_enable = true;
+    wallrange = right_length;
     break;
 
   case 21:
-    error = -(cot_angle(yaw)) + (0.6 - get_right_distence(cot_angle(yaw)))*5;
+    error = -(cot_angle(yaw)) + (wallrange - get_right_distence(cot_angle(yaw)))*5;
     error_dot = error - error_back;
     error_back= error;
 
@@ -910,16 +985,15 @@ void changeControllers(int _stage, ros::ServiceClient* _funcase_client,ros::Serv
     error = -cot_angle(yaw-(M_PI *90.0/180.0));
     error_dot = error - error_back;
     error_back= error;
-    error_sum += error;
-    turn = static_cast<int16_t>(turndeg_kp*error + turndeg_kd*error_dot + turndeg_ki * error_sum);
+    turn = static_cast<int16_t>(turndeg_kp*error + turndeg_kd*error_dot);
 
     if(turn > 0){
-      moveit_msg.data.push_back(turn+110);
+      moveit_msg.data.push_back(turn+100);
       moveit_msg.data.push_back(-turn-125);
       printf("l speed: %d\n", turn+100);
       printf("r speed: %d\n", -turn-100);
     }else{
-      moveit_msg.data.push_back(turn-110);
+      moveit_msg.data.push_back(turn-100);
       moveit_msg.data.push_back(-turn+125);
       printf("l speed: %d\n", turn-100);
       printf("r speed: %d\n", -turn+100);
@@ -940,13 +1014,23 @@ void changeControllers(int _stage, ros::ServiceClient* _funcase_client,ros::Serv
     break;
   
   case 24:
+    if(isnan(front_length)){
+      speed = back_speed;
+    }else {
+      speed = static_cast<double>(front_length * 50);
+    }
+    if(speed > 200.0)
+      speed = 200.0;
+    if(speed < 70.0)
+      speed = 70.0;
+   
     error = -(cot_angle(yaw)) + (0.45 - get_right_distence(cot_angle(yaw)))*5;
     error_dot = error - error_back;
     error_back= error;
 
     turn = static_cast<int16_t>(ORIENT_RIGHT_KP*error + ORIENT_RIGHT_KD*error_dot);
-    moveit_msg.data.push_back(100+turn);
-    moveit_msg.data.push_back(100-turn+10);
+    moveit_msg.data.push_back(speed+turn);
+    moveit_msg.data.push_back(speed-turn+10);
     pubmsg_enable = true;
     break;
 
@@ -954,24 +1038,20 @@ void changeControllers(int _stage, ros::ServiceClient* _funcase_client,ros::Serv
     error = -cot_angle(yaw-(M_PI *90.0/180.0));
     error_dot = error - error_back;
     error_back= error;
-    error_sum += error;
-    turn = static_cast<int16_t>(turndeg_kp*error + turndeg_kd*error_dot + turndeg_ki * error_sum);
+    turn = static_cast<int16_t>(turndeg_kp*error + turndeg_kd*error_dot);
+
 
     if(turn > 0){
-      moveit_msg.data.push_back(turn+110);
+      moveit_msg.data.push_back(turn+100);
       moveit_msg.data.push_back(-turn-125);
       printf("l speed: %d\n", turn+100);
       printf("r speed: %d\n", -turn-100);
     }else{
-      moveit_msg.data.push_back(turn-110);
+      moveit_msg.data.push_back(turn-100);
       moveit_msg.data.push_back(-turn+125);
       printf("l speed: %d\n", turn-100);
       printf("r speed: %d\n", -turn+100);
     }
-
-    printf("error: %4.3f\n",error);
-    printf("error dot: %4.3f\n",error_dot);
-    printf("turn: %d\n", turn);
     pubmsg_enable = true;
     break;
 
@@ -1010,17 +1090,6 @@ void changeControllers(int _stage, ros::ServiceClient* _funcase_client,ros::Serv
     printf("turn: %d\n", turn);
     break;
 
-  case 271:
-    if(yaw > 0 ){
-      moveit_msg.data.push_back(70);
-      moveit_msg.data.push_back(100);
-    }else{
-      moveit_msg.data.push_back(100);
-      moveit_msg.data.push_back(70);
-    }
-    
-    pubmsg_enable = true;
-    break;
   case 28:
     error = -(cot_angle(yaw)) + (wallrange - get_right_distence(cot_angle(yaw)))*5;
     error_dot = error - error_back;
@@ -1032,17 +1101,54 @@ void changeControllers(int _stage, ros::ServiceClient* _funcase_client,ros::Serv
     pubmsg_enable = true;
     break;
     
-  case 29:
+  case 291:
+    if(yaw > 0 ){
+      moveit_msg.data.push_back(-100);
+      moveit_msg.data.push_back(100);
+    }else{
+      moveit_msg.data.push_back(100);
+      moveit_msg.data.push_back(-100);
+    }
+    pubmsg_enable = true;
+    break;
+
+  case 292:
     switch_control.request.stop_controllers.push_back("move_it_controller");
     switch_control.request.start_controllers.push_back("track_line_controller");
     switch_enable = true;
-    SetLineDynamicParams(&dynamic_msg, -0.2,0.0,-4.7,255.0);
+    SetLineDynamicParams(&dynamic_msg, -0.5,0.0,-6.0,85.0);
     dynamic_srv.request.config = dynamic_msg;
     dyline_enable = true;
-    
     break;
 
-  case 30:
+  case 293:
+    break;
+
+  case 294:
+    SetLineDynamicParams(&dynamic_msg, -0.5,0.0,-6.0,40.0);
+    dynamic_srv.request.config = dynamic_msg;
+    dyline_enable = true;
+    break;
+
+  case 295:
+    switch_control.request.stop_controllers.push_back("track_line_controller");
+    switch_control.request.stop_controllers.push_back("move_it_controller");
+    switch_enable = true;
+    break;
+
+  case 301:
+    //track wall
+    error = -(cot_angle(yaw)) + (wallrange - get_right_distence(cot_angle(yaw)))*5;
+    error_dot = error - error_back;
+    error_back= error;
+
+    turn = static_cast<int16_t>(ORIENT_RIGHT_KP*error + ORIENT_RIGHT_KD*error_dot);
+    moveit_msg.data.push_back(90+turn);
+    moveit_msg.data.push_back(90-turn+10);
+    pubmsg_enable = true;
+    break;
+
+  case 302:
     moveit_msg.data.push_back(0);
     moveit_msg.data.push_back(0);
     pubmsg_enable = true;
@@ -1073,7 +1179,6 @@ void changeControllers(int _stage, ros::ServiceClient* _funcase_client,ros::Serv
     switch_control.request.stop_controllers.push_back("track_line_controller");
     switch_control.request.start_controllers.push_back("move_it_controller");
     switch_enable = true;
-    setzeo_enable = true;
     break;
  
   case 35:
@@ -1083,7 +1188,7 @@ void changeControllers(int _stage, ros::ServiceClient* _funcase_client,ros::Serv
     break;
 
   case 36:
-   error = -cot_angle(yaw-(M_PI *90.0/180.0));
+   error = -cot_angle(yaw-(M_PI *(-90.0)/180.0));
     error_dot = error - error_back;
     error_back= error;
     turn = static_cast<int16_t>(turndeg_kp*error + turndeg_kd*error_dot);
@@ -1092,12 +1197,12 @@ void changeControllers(int _stage, ros::ServiceClient* _funcase_client,ros::Serv
       moveit_msg.data.push_back(turn+100);
       moveit_msg.data.push_back(-turn-125);
       printf("l speed: %d\n", turn+100);
-      printf("r speed: %d\n", -turn-100);
+      printf("r speed: %d\n", -turn-125);
     }else{
       moveit_msg.data.push_back(turn-100);
       moveit_msg.data.push_back(-turn+125);
       printf("l speed: %d\n", turn-100);
-      printf("r speed: %d\n", -turn+100);
+      printf("r speed: %d\n", -turn+125);
     }
 
     printf("error: %4.3f\n",error);
@@ -1111,7 +1216,6 @@ void changeControllers(int _stage, ros::ServiceClient* _funcase_client,ros::Serv
     //wallrange = right_length;
     rotation_Xangle(1,90,&moveit_msg);
     pubmsg_enable = true;
-    setzeo_enable = true;
     break;
 
   case 38:
@@ -1120,7 +1224,11 @@ void changeControllers(int _stage, ros::ServiceClient* _funcase_client,ros::Serv
     pubmsg_enable = true;
     break;
 
-  
+  case 39:
+    moveit_msg.data.push_back(0);
+    moveit_msg.data.push_back(0);
+    pubmsg_enable = true;
+    break;
   }
 
   if(setzeo_enable)
@@ -1166,27 +1274,16 @@ bool stage_change_detect(int _stage){
       fg_usetimer = true;
     }
     if(fg_usetimer){
-      if((sensor_value[6] == 2)){
-        case1_Lspeed = -case1_Lspeed;
-        case1_Rspeed = case1_Rspeed;        
-      }
-      else if((sensor_value[6] == 1)){
-        case1_Lspeed = case1_Lspeed; 
-        case1_Rspeed = -case1_Rspeed;
-      }
-      else if((sensor_value[6] == 0)){
-        case1_Lspeed = case1_Lspeed; 
-        case1_Rspeed = case1_Rspeed;
-      }else{
-        case1_Lspeed = -case1_Lspeed; 
-        case1_Rspeed = -case1_Rspeed;
-      }
-      if((ros::Time::now().toSec() - last_time.toSec() > 1.0f) &&(sensor_value[6] == 3)){
+      if((ros::Time::now().toSec() - last_time.toSec() > TASK_1_WAIT_DURATION) && (sensor_value[6] == 3)){
+        fg_usetimer = false;
         last_time = ros::Time::now();
         return true;
       }
     }
-
+    //sensor all black
+    //if(get_sensor_average() > 200)
+    //if(sensor_value[6] == 3)
+    //  return true;
     break;
 
   case 2:
@@ -1213,11 +1310,22 @@ bool stage_change_detect(int _stage){
       stable_detector.stop();
       error_dot = 0.0;
       error_back= 0.0;
-      error_sum = 0.0;
       return true;
     }
     break;
 
+
+  case 201:
+   if(right_length > 0.7f)
+      laser_distence_overlimit_conter++;
+    if(laser_distence_overlimit_conter > 2 ) {
+      laser_distence_overlimit_conter = 0;
+      error_dot = 0.0;
+      error_back= 0.0;
+      return true;
+    }
+    break;
+    
   case 3:
     //wait duration
     if(!fg_usetimer){
@@ -1233,7 +1341,7 @@ bool stage_change_detect(int _stage){
     }
     break;
 
-  case 302:
+  case 667:
     //wait 2.0S
     if(!fg_usetimer){
       last_time = ros::Time::now();
@@ -1289,7 +1397,7 @@ bool stage_change_detect(int _stage){
     
     break;
 
-  case 6:
+ /* case 6:
     //change controller duration
     if(!fg_usetimer){
       last_time = ros::Time::now();
@@ -1355,7 +1463,7 @@ bool stage_change_detect(int _stage){
     //sensor all black
     if(get_sensor_average() > TASK_10_SENSOR_THROSHOLD)
       return true;
-    break;
+    break;*/
 
   case 11:
     //change controller duration
@@ -1380,7 +1488,6 @@ bool stage_change_detect(int _stage){
       laser_distence_overlimit_conter = 0;
       error_dot = 0.0;
       error_back= 0.0;
-      error_sum = 0.0;
       return true;
     }
     break;
@@ -1412,7 +1519,6 @@ bool stage_change_detect(int _stage){
       stable_detector.stop();
       error_dot = 0.0;
       error_back= 0.0;
-      error_sum = 0.0;
       return true;
     }
     break;
@@ -1462,7 +1568,6 @@ bool stage_change_detect(int _stage){
         fg_usetimer = false;
         error_dot = 0.0;
         error_back= 0.0;
-        error_sum = 0.0;
         return true;
       }
     }
@@ -1470,27 +1575,26 @@ bool stage_change_detect(int _stage){
 
   case 17:
     //sensor all black
-    if(pitch >= 2){
+    if(std::abs(pitch) >= 2){
       error_dot = 0.0;
       error_back= 0.0;
-      error_sum = 0.0;
       return true;
     }
     break;
 
   case 171:
 //    if(right_length > 1.0){
-    if(isnan(right_length)){
+    if(sensor_value[6] == 3){
       error_dot = 0.0;
       error_back= 0.0;
-      error_sum = 0.0;
       return true;
     }
     break;
 
   case 172:
     if(sensor_value[2] < 50 || sensor_value[3] <50)
-      return true;
+      if((cot_angle(yaw - (M_PI * 90.0/180))) < M_PI * 10.0/180.0)
+        return true;
     break;
 
   case 18:
@@ -1509,6 +1613,81 @@ bool stage_change_detect(int _stage){
     break;
 
   case 19:
+    if(!fg_usetimer){
+      last_time = ros::Time::now();
+      fg_usetimer = true;
+    }
+    if(fg_usetimer){
+      if(sensor_value[6] == 1) {
+        if(ros::Time::now().toSec() - last_time.toSec() > 1.0f){
+          fg_usetimer = false;
+          last_time = ros::Time::now();
+          error_dot = 0.0;
+          error_back= 0.0;
+          return true;
+        }
+      }
+    }
+    break;
+
+
+  case 191:
+    //change controller duration
+    if(!fg_usetimer){
+      last_time = ros::Time::now();
+      fg_usetimer = true;
+    }
+    if(fg_usetimer){
+      if(sensor_value[6] == 1) {
+        if(ros::Time::now().toSec() - last_time.toSec() > 1.0f){
+          fg_usetimer = false;
+          last_time = ros::Time::now();
+          error_dot = 0.0;
+          error_back= 0.0;
+          return true;
+        }
+      }
+    }
+    break;
+
+  case 192:
+    //change controller duration
+    if(!fg_usetimer){
+      last_time = ros::Time::now();
+      fg_usetimer = true;
+    }
+    if(fg_usetimer){
+      if(sensor_value[6] == 1) {
+        if(ros::Time::now().toSec() - last_time.toSec() > 1.0f){
+          fg_usetimer = false;
+          last_time = ros::Time::now();
+          error_dot = 0.0;
+          error_back= 0.0;
+          return true;
+        }
+      }
+    }
+    break;
+
+  case 193:
+    //change controller duration
+    if(!fg_usetimer){
+      last_time = ros::Time::now();
+      fg_usetimer = true;
+    }
+    if(fg_usetimer){
+      if(sensor_value[6] == 2) {
+        if(ros::Time::now().toSec() - last_time.toSec() > 1.0f){
+          fg_usetimer = false;
+          last_time = ros::Time::now();
+          error_dot = 0.0;
+          error_back= 0.0;
+          return true;
+        }
+      }
+    }
+    break;
+  case 194:
     //wait duration
     if(!fg_usetimer){
       last_time = ros::Time::now();
@@ -1522,6 +1701,7 @@ bool stage_change_detect(int _stage){
       }
     }
     break;
+
   case 20:
     //change controller duration
     if(!fg_usetimer){
@@ -1534,7 +1714,6 @@ bool stage_change_detect(int _stage){
         last_time = ros::Time::now();
         error_dot = 0.0;
         error_back= 0.0;
-        error_sum = 0.0;
         return true;
       }
     }
@@ -1589,7 +1768,7 @@ bool stage_change_detect(int _stage){
     }
     if(fg_usetimer){
       if(ros::Time::now().toSec() - last_time.toSec() > 1.5f) {
-        if(front_length < 0.7f)
+        if(front_length < 0.5f)
           laser_distence_overlimit_conter++;
       }
     }
@@ -1598,7 +1777,6 @@ bool stage_change_detect(int _stage){
       fg_usetimer = false;
       error_dot = 0.0;
       error_back= 0.0;
-      error_sum = 0.0;
       return true;
     }
     break;
@@ -1629,7 +1807,6 @@ bool stage_change_detect(int _stage){
         last_time = ros::Time::now();
         error_dot = 0.0;
         error_back= 0.0;
-        error_sum = 0.0;
         return true;
       }
     }
@@ -1646,7 +1823,6 @@ bool stage_change_detect(int _stage){
         fg_usetimer = false;
         error_dot = 0.0;
         error_back= 0.0;
-        error_sum = 0.0;
         return true;
       }
     }
@@ -1665,11 +1841,6 @@ bool stage_change_detect(int _stage){
     }*/
     break;
 
-  case 271:
-    if(sensor_value[2] > 200 || sensor_value[3] > 200)
-      return true;
-    break;
-
   case 28:
     //slope down
     if(!fg_usetimer && pitch > 5.0)
@@ -1685,7 +1856,6 @@ bool stage_change_detect(int _stage){
           laser_distence_overlimit_conter = 0;
           error_dot = 0.0;
           error_back= 0.0;
-          error_sum = 0.0;
           return true;
         }
       }
@@ -1708,8 +1878,16 @@ bool stage_change_detect(int _stage){
       }
     }*/
     break;
+  
+  case 291:
+    if(sensor_value[2] > 200 || sensor_value[3] > 200)
+      if((cot_angle(yaw - (M_PI * 90.0/180))) < M_PI * 10.0/180.0)
+        return true;
+      else if((cot_angle(yaw)) < M_PI * 10.0/180.0)
+        return true;
+    break;
 
-  case 29:
+  case 292:
     //change controller duration
     if(!fg_usetimer){
       last_time = ros::Time::now();
@@ -1724,19 +1902,43 @@ bool stage_change_detect(int _stage){
     }
     break;
 
-  case 30:
-    //wait duration
+  case 293:
+    if((yaw < (M_PI*3.0/180.0)) && (pitch > 3.0))
+      return true; 
+    break;
+
+  case 294:
+    if((yaw < (M_PI*3.0/180.0)) && (pitch < 1.0))
+      return true;
+    break;
+
+  case 295:
+    //change controller duration
     if(!fg_usetimer){
       last_time = ros::Time::now();
       fg_usetimer = true;
     }
     if(fg_usetimer){
-      if(sensor_value[6] == 3) {
+      if(ros::Time::now().toSec() - last_time.toSec() > SWITCH_CONTROLLER_DURATION) {
         fg_usetimer = false;
         last_time = ros::Time::now();
         return true;
       }
     }
+    break;
+
+  case 301:
+    //scan front
+    if(front_length < 0.6f)
+      laser_distence_overlimit_conter++;
+    if(laser_distence_overlimit_conter > 2 ) {
+      laser_distence_overlimit_conter = 0;
+      return true;
+    }
+    break;
+
+  case 302:
+    
     break;
 
   case 31:
@@ -1755,8 +1957,9 @@ bool stage_change_detect(int _stage){
     break;
 
   case 32:
-    /*printf("************* %4.3f *********",fabs(cot_angle(yaw-(M_PI *180.0/180.0))));
-
+    printf("************* %4.3f *********",fabs(cot_angle(yaw-(M_PI *180.0/180.0))));
+    /*if((fabs(cot_angle(yaw-(M_PI *180.0/180.0))) < M_PI * 7.0/180.0) && (right_length < 0.5))
+      return true;*/
 
     if(!fg_usetimer){
       last_time = ros::Time::now();
@@ -1770,11 +1973,7 @@ bool stage_change_detect(int _stage){
           return true;
         }
       }
-    }*/
-   
-    if((sensor_value[6] == 1) && (sensor_value[5] < 30))
-      return true;
-
+    }
     break;
 
   case 33:
@@ -1803,7 +2002,7 @@ bool stage_change_detect(int _stage){
       fg_usetimer = true;
     }
     if(fg_usetimer){
-      if((ros::Time::now().toSec() - last_time.toSec() > 0.1f)){
+      if((ros::Time::now().toSec() - last_time.toSec() > 0.05f)){
         fg_usetimer = false;
         last_time = ros::Time::now();
         return true;
@@ -1812,7 +2011,7 @@ bool stage_change_detect(int _stage){
     break; 
 
   case 36:
-    if(!stable_detector.isStarted()) {
+    /*if(!stable_detector.isStarted()) {
       stable_detector.init(M_PI * (90.0)/180);
       stable_detector.start();
     } else {
@@ -1820,6 +2019,13 @@ bool stage_change_detect(int _stage){
     }
     if(stable_detector.isConverged()) {
       stable_detector.stop();
+      return true;
+    }*/
+
+    if(fabs(yaw + (M_PI*90.0/180.0)) < (M_PI*2.0/180.0))
+      laser_distence_overlimit_conter++;
+    if(laser_distence_overlimit_conter == 10){
+      laser_distence_overlimit_conter = 0;
       return true;
     }
     break; 
@@ -1831,12 +2037,9 @@ bool stage_change_detect(int _stage){
       fg_usetimer = true;
     }
     if(fg_usetimer){
-      if(ros::Time::now().toSec() - last_time.toSec() > 0.2f) {
+      if(ros::Time::now().toSec() - last_time.toSec() > 5.2f) {
         fg_usetimer = false;
         last_time = ros::Time::now();
-        error_dot = 0.0;
-        error_back= 0.0;
-        error_sum = 0.0;
         return true;
       }
     }
@@ -1855,7 +2058,6 @@ bool stage_change_detect(int _stage){
       }
     }
     break; 
-
   }
   // Default False
   return false;
