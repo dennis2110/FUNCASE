@@ -4,8 +4,6 @@
 #include "std_msgs/Bool.h"
 #include "std_msgs/UInt8.h"
 #include "controller_manager_msgs/SwitchController.h"
-//#include <joy_msg/JoyCmd.h>
-//#include "funcase_client/JoyCmd.h"
 using namespace std;
 /***********************************************/
 
@@ -193,7 +191,7 @@ int main(int argc, char **argv)
        	   ROS_INFO("stage 1 : Right");
       	 }else if(joys[9]==1){
            lspeed=110;
-           rspeed=140;
+           rspeed=150;
 				   ROS_INFO("stage 1 : Front");
 				 }else if(joys[8]==1){
       	   lspeed=130;
