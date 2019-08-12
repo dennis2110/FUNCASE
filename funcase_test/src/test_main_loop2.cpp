@@ -522,9 +522,9 @@ int main(int argc, char **argv)
             stage = 31;
             is_call = false;
           }
-      }else if(stage == 999){
+      }else if(stage == 99932){
         if(stage_change_detect(stage)){
-            stage = 666;
+            stage = 99934;
             is_call = false;
           }
       }else if(stage == 9992934){
@@ -1280,7 +1280,7 @@ void changeControllers(int _stage, ros::ServiceClient* _funcase_client,ros::Serv
   case 31:
     switch_control.request.stop_controllers.push_back("move_it_controller");
     switch_control.request.start_controllers.push_back("track_line_controller");
-    SetLineDynamicParams(&dynamic_msg, 0.7,0.0007,10.0,150.0);
+    SetLineDynamicParams(&dynamic_msg, 0.5,0.00005,11.0,130.0);
     dynamic_srv.request.config = dynamic_msg;
     dyline_enable = true;
     switch_enable = true;
@@ -1293,7 +1293,7 @@ void changeControllers(int _stage, ros::ServiceClient* _funcase_client,ros::Serv
     break;
 
   case 33:
-    SetLineDynamicParams(&dynamic_msg, 0.2,0.0,4.5,100.0);
+    SetLineDynamicParams(&dynamic_msg, 0.2,0.0,5.0,110.0);
     dynamic_srv.request.config = dynamic_msg;
     dyline_enable = true;
     break;
@@ -1439,7 +1439,9 @@ bool stage_change_detect(int _stage){
 
 
   case 201:
-   if(right_length > 0.7f)
+    if(isnan(right_length))
+      return true;
+    if(right_length > 0.7f)
       laser_distence_overlimit_conter++;
     if(laser_distence_overlimit_conter > 2 ) {
       laser_distence_overlimit_conter = 0;
@@ -2210,7 +2212,7 @@ bool stage_change_detect(int _stage){
 
   case 302:
     //fund s line
-    if(sensor_value[2] < 30 || sensor_value[3] < 30)
+    if((sensor_value[2] < 30 || sensor_value[3] < 30) && sensor_value[0] > 200 && sensor_value[5] > 200)
       return true;
     break;
 
@@ -2239,8 +2241,8 @@ bool stage_change_detect(int _stage){
       fg_usetimer = true;
     }
     if(fg_usetimer){
-      if(ros::Time::now().toSec() - last_time.toSec() > 20.0) {
-        if((fabs(cot_angle(yaw-(M_PI *180.0/180.0))) < M_PI * 5.0/180.0) && (right_length < 0.6)){
+      if(ros::Time::now().toSec() - last_time.toSec() > 15.0) {
+        if((fabs(cot_angle(yaw-(M_PI *180.0/180.0))) < M_PI * 5.0/180.0) && (right_length < 0.7)){
           fg_usetimer = false;
           last_time = ros::Time::now();
           return true;
@@ -2250,8 +2252,19 @@ bool stage_change_detect(int _stage){
     break;
 
   case 33:
-    if(sensor_value[6] == 1)
-      return true;
+    if(!fg_usetimer){
+      last_time = ros::Time::now();
+      fg_usetimer = true;
+    }
+    if(fg_usetimer){
+      if(ros::Time::now().toSec() - last_time.toSec() > 2.0) {
+        if(get_sensor_average() < 150){
+          fg_usetimer = false;
+          last_time = ros::Time::now();
+          return true;
+        }
+      }
+    }
     break;
 
   case 34:
@@ -2275,7 +2288,7 @@ bool stage_change_detect(int _stage){
       fg_usetimer = true;
     }
     if(fg_usetimer){
-      if((ros::Time::now().toSec() - last_time.toSec() > 0.08f)){
+      if((ros::Time::now().toSec() - last_time.toSec() > 0.1f)){
         fg_usetimer = false;
         last_time = ros::Time::now();
         return true;
