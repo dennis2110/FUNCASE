@@ -99,6 +99,7 @@ void loop() {
 //    writecmd[i+2] = (uint8_t)MotorCMD[i];
 //  }
 
+
   writecmd[2]= map(analogRead(A0),0,1023,0,255);
   writecmd[3]= map(analogRead(A1),0,1023,0,255);
   writecmd[4]= map(analogRead(A2),0,1023,0,255);
