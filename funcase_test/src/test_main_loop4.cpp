@@ -312,7 +312,7 @@ void callback_scan(const sensor_msgs::LaserScan msg){
 
 int main(int argc, char **argv)
 {
-  ros::init(argc, argv, "test_main_loop2");
+  ros::init(argc, argv, "test_main_loop4");
   ros::NodeHandle node;
 
   /********************************** Client **********************************/
@@ -2360,7 +2360,7 @@ bool stage_change_detect(int _stage){
       return true;
     }*/
 
-    if(fabs(yaw + (M_PI*90.0/180.0)) < (M_PI*2.0/180.0))
+    if(fabs(yaw + (M_PI*90.0/180.0)) < (M_PI*3.0/180.0))
       laser_distence_overlimit_conter++;
     if(laser_distence_overlimit_conter == 15){
       laser_distence_overlimit_conter = 0;

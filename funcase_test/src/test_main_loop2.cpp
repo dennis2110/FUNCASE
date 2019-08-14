@@ -15,7 +15,7 @@
 /****************    Config   *******************/
 #define SENSOR_REG_COUNT (7)
 #define SIZE_DATA_RECOARD (10)
-#define CONVERG_THROSHOLD (M_PI * 1.0/180.0)
+#define CONVERG_THROSHOLD (M_PI * 1.5/180.0)
 
 #define SWITCH_CONTROLLER_DURATION    (0.0)
 #define turndeg_kp (30.0f)
@@ -2246,7 +2246,7 @@ bool stage_change_detect(int _stage){
     break;
 
   case 301:
-    if(get_front_distence(cot_angle(-yaw)) < 0.8f){
+    if(get_front_distence(cot_angle(-yaw)) < 0.74f){
         laser_distence_overlimit_conter++;
     }
     if(laser_distence_overlimit_conter > 2 ) {
@@ -2355,7 +2355,7 @@ bool stage_change_detect(int _stage){
       return true;
     }*/
 
-    if(fabs(yaw + (M_PI*90.0/180.0)) < (M_PI*2.0/180.0))
+    if(fabs(yaw + (M_PI*90.0/180.0)) < (M_PI*3.0/180.0))
       laser_distence_overlimit_conter++;
     if(laser_distence_overlimit_conter == 15){
       laser_distence_overlimit_conter = 0;
