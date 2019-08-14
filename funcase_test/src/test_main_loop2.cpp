@@ -20,7 +20,7 @@
 #define SWITCH_CONTROLLER_DURATION    (0.0)
 #define turndeg_kp (30.0f)
 #define turndeg_kd (180.0f)
-#define DECELERATION_KP  (50)
+#define DECELERATION_KP  (45)
 #define ORIENT_RIGHT_KP  (100.0f)
 #define ORIENT_RIGHT_KD  (3400.0f)
 #define ORIENT_plus_RIGHT_KP  (50.0f)
@@ -387,6 +387,9 @@ int main(int argc, char **argv)
       }else if (stage == 171){
         //track wall (slope down)
         changeControllers(stage, &funcase_client, &IMU_zero_client, &move_it_pub, &dynamic_line_client, &dynamic_wall_client);
+      }else if (stage == 173){
+        //track wall (slope down)
+        changeControllers(stage, &funcase_client, &IMU_zero_client, &move_it_pub, &dynamic_line_client, &dynamic_wall_client);
       }else if (stage == 21){
         //
         changeControllers(stage, &funcase_client, &IMU_zero_client, &move_it_pub, &dynamic_line_client, &dynamic_wall_client);
@@ -541,7 +544,7 @@ int main(int argc, char **argv)
             stage = 99934;
             is_call = false;
           }
-      }else if(stage == 9992934){
+      }else if(stage == 99934){
         if(stage_change_detect(stage)){
             stage = 666;
             is_call = false;
@@ -929,13 +932,15 @@ void changeControllers(int _stage, ros::ServiceClient* _funcase_client,ros::Serv
     pubmsg_enable = true;
 
   case 173:
-    if((left_length < 1.8f) && (get_sensor_average() > 220)){
+    printf("sensor average -> %4.3f\n", get_sensor_average());
+    printf("s1 -> %d, s2 -> %d, s3 -> %d, s4 -> %d\n", sensor_value[1], sensor_value[2], sensor_value[3], sensor_value[4]);
+    if((get_left_distence(cot_angle(yaw)) < 1.8f) && (get_sensor_average() > 150.0f)){
       moveit_msg.data.push_back(-100);
       moveit_msg.data.push_back(150);
-    }else if ((left_length > 1.8f) && (get_sensor_average() > 220)){
+    }else if ((get_left_distence(cot_angle(yaw)) > 1.8f) && (get_sensor_average() > 150.0f)){
       moveit_msg.data.push_back(150);
       moveit_msg.data.push_back(-100);
-    }else if(get_sensor_average() < 220){
+    }else if(get_sensor_average() < 150){
       moveit_msg.data.push_back(0);
       moveit_msg.data.push_back(0);    
     }
@@ -964,7 +969,7 @@ void changeControllers(int _stage, ros::ServiceClient* _funcase_client,ros::Serv
      if(isnan(front_length)){
       speed = back_speed;
     }else {
-      speed = static_cast<double>(front_length * 25);
+      speed = static_cast<double>(front_length * 20);
     }
     if(speed > 200.0)
       speed = 200.0;
@@ -981,7 +986,7 @@ void changeControllers(int _stage, ros::ServiceClient* _funcase_client,ros::Serv
      if(isnan(front_length)){
       speed = back_speed;
     }else {
-      speed = static_cast<double>(front_length * 23);
+      speed = static_cast<double>(front_length * 20);
     }
     if(speed > 200.0)
       speed = 200.0;
@@ -995,7 +1000,7 @@ void changeControllers(int _stage, ros::ServiceClient* _funcase_client,ros::Serv
     break;
 
   case 193:
-    SetLineDynamicParams(&dynamic_msg, 0.2,0.0,4.7,80.0);
+    SetLineDynamicParams(&dynamic_msg, 0.2,0.0,4.7,75.0);
     dynamic_srv.request.config = dynamic_msg;
     dyline_enable = true;
     break;   
@@ -1072,7 +1077,7 @@ void changeControllers(int _stage, ros::ServiceClient* _funcase_client,ros::Serv
     if(isnan(front_length)){
       speed = 150;
     }else {
-      speed = static_cast<double>(front_length * 40);
+      speed = static_cast<double>(front_length * 50);
     }
     if(speed > 150.0)
       speed = 150.0;
@@ -1195,7 +1200,7 @@ void changeControllers(int _stage, ros::ServiceClient* _funcase_client,ros::Serv
      if(isnan(front_length)){
       speed = back_speed;
     }else {
-      speed = static_cast<double>(front_length * 25);
+      speed = static_cast<double>(front_length * 15);
     }
     if(speed > 200.0)
       speed = 200.0;
@@ -1306,7 +1311,7 @@ void changeControllers(int _stage, ros::ServiceClient* _funcase_client,ros::Serv
       moveit_msg.data.push_back(70+10);    
     }
     pubmsg_enable = true;*/
-    error = -(cot_angle(yaw)) + (0.42 - get_right_distence(cot_angle(yaw)))*5;
+    error = -(cot_angle(yaw)) + (0.6 - get_right_distence(cot_angle(yaw)))*5;
     error_dot = error - error_back;
     error_back= error;
 
@@ -1901,6 +1906,7 @@ bool stage_change_detect(int _stage){
       
       return true;
     }
+
     break;
 
   case 22:

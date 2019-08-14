@@ -58,16 +58,16 @@ void funcase_controllers::TrackLineController::update(const ros::Time &time, con
       if(sensor_data[6] == 1){
         last_time = ros::Time::now();
         is_usetimer = true;
-        r_speed = 120;
-        l_speed = -150;
+        r_speed = 130.0;
+        l_speed = -130.0;
         
         ROS_INFO("turn RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR");
       }
       else if(sensor_data[6] == 2){
         last_time = ros::Time::now();
         is_usetimer = true;
-        r_speed = -150.0;
-        l_speed = 120;
+        r_speed = -130.0;
+        l_speed = 130.0;
        
         ROS_INFO("turn LLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLl");
       }
@@ -78,7 +78,7 @@ void funcase_controllers::TrackLineController::update(const ros::Time &time, con
       m_right_wheel.setCommand(r_speed);
       ROS_INFO("turnturnturnturnturnturnturnturnturnturntur");
       if(ros::Time::now().toSec() - last_time.toSec() > 0.2) {
-        if((sensor_data[2] < 30) || (sensor_data[3] < 30)){
+        if((sensor_data[2] < 30) || (sensor_data[3] < 30 )){
           is_usetimer = false;
           m_left_wheel.setCommand(0);
           m_right_wheel.setCommand(0);
@@ -96,15 +96,15 @@ void funcase_controllers::TrackLineController::update(const ros::Time &time, con
       if(sensor_data[6] == 2){
         last_time = ros::Time::now();
         is_usetimer = true;
-        r_speed = 120;
-        l_speed = -150;
+        r_speed = 130;
+        l_speed = -130;
         ROS_INFO("turn RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR");
       }
       else if(sensor_data[6] == 1){
         last_time = ros::Time::now();
         is_usetimer = true;
-        r_speed = -150.0;
-        l_speed = 120;
+        r_speed = -130.0;
+        l_speed = 130;
         ROS_INFO("turn LLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLl");
       }
     }
@@ -114,7 +114,7 @@ void funcase_controllers::TrackLineController::update(const ros::Time &time, con
       m_right_wheel.setCommand(r_speed);
       ROS_INFO("turnturnturnturnturnturnturnturnturnturntur");
       if(ros::Time::now().toSec() - last_time.toSec() > 0.2) {
-        if((sensor_data[2] > 220) || (sensor_data[3] >220)){
+        if((sensor_data[2] > 220) || (sensor_data[3] >220 || sensor_data[1] > 220) || (sensor_data[4] >220)){
           is_usetimer = false;
           m_left_wheel.setCommand(0);
           m_right_wheel.setCommand(0);

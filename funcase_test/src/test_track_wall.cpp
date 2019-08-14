@@ -193,7 +193,7 @@ int main(int argc, char **argv)
 
       if(stage == 2){
         //stop at stage 15
-      }else if(stage ==0){
+      }else if(stage ==1){
           if(stage_change_detect(stage)){
             stage = 4;
             is_call = false;
@@ -314,15 +314,22 @@ void changeControllers(int _stage, ros::ServiceClient* _funcase_client,ros::Serv
   case 1:
     //         ORIENT_RIGHT_KP              TASK_10_LENGTH_RIGHT
 //    error = (wallrange - get_right_distence(cot_angle(yaw)));
-    error = -(cot_angle(yaw)) + (0.4 - get_right_distence(cot_angle(yaw)))*5;
+    error = -(cot_angle(yaw)) + (0.7 - get_right_distence(cot_angle(yaw)))*5;
     error_dot = error - error_back;
     error_back= error;
 
     turn = static_cast<int16_t>(ORIENT_RIGHT_KP*error + ORIENT_RIGHT_KD*error_dot);
-    moveit_msg.data.push_back(100+turn);
-    moveit_msg.data.push_back(100-turn+10);
+    
+    
+    if(front_length < 1.2f){
+      moveit_msg.data.push_back(200);
+      moveit_msg.data.push_back(80);
+    }else{
+      moveit_msg.data.push_back(100+turn);
+      moveit_msg.data.push_back(100-turn+10);
+    }
+    
     pubmsg_enable = true;
-
     printf("error: %4.3f\n",error);
     printf("error2: %4.3f\n",wallrange - get_right_distence(cot_angle(yaw)));
     printf("error dot: %4.3f\n",error_dot);
@@ -366,22 +373,26 @@ void changeControllers(int _stage, ros::ServiceClient* _funcase_client,ros::Serv
     break;
 
   case 4:
-    error = -get_right_distence(cot_angle(yaw)) + get_left_distence(cot_angle(yaw));
+    error = -(cot_angle(yaw - (M_PI *90.0/180.0))) + (0.4 - get_right_distence(cot_angle(yaw - (M_PI *90.0/180.0))))*5;
     error_dot = error - error_back;
     error_back= error;
 
-    printf("error -> %4.3f\n", error);
-    turn = static_cast<int16_t>(50.0*error + 15000*error_dot);
+    turn = static_cast<int16_t>(ORIENT_RIGHT_KP*error + ORIENT_RIGHT_KD*error_dot);
+    
+    
 
     moveit_msg.data.push_back(100+turn);
-    moveit_msg.data.push_back(100-turn+25);
+    moveit_msg.data.push_back(100-turn+10);
+    
+    
     pubmsg_enable = true;
-    printf("right_D -> %4.3f\n", get_right_distence(cot_angle(yaw)));
-    printf("left_D -> %4.3f\n", get_left_distence(cot_angle(yaw)));
-    printf("l speed: %d\n", 100+turn);
-    printf("r speed: %d\n\n", 100-turn);
+    printf("error: %4.3f\n",error);
+    printf("error2: %4.3f\n",wallrange - get_right_distence(cot_angle(yaw)));
+    printf("error dot: %4.3f\n",error_dot);
+    printf("turn: %d\n", turn);
+    printf("r speed: %d\n", 100+turn);
+    printf("l speed: %d\n\n", 100-turn);
     break;
-
   case 5:
     switch_control.request.stop_controllers.push_back("track_line_controller");
     switch_control.request.start_controllers.push_back("move_it_controller");
@@ -484,7 +495,7 @@ bool stage_change_detect(int _stage){
       fg_usetimer = true;
     }
     if(fg_usetimer){
-      if(ros::Time::now().toSec() - last_time.toSec() > 7.0) {
+      if((yaw >= M_PI*50.0/180.0) && (yaw <= M_PI*130.0/180.0)) {
         fg_usetimer = false;
         last_time = ros::Time::now();
         return true;
@@ -519,7 +530,7 @@ bool stage_change_detect(int _stage){
       fg_usetimer = true;
     }
     if(fg_usetimer){
-      if(ros::Time::now().toSec() - last_time.toSec() > 5.0f) {
+      if(ros::Time::now().toSec() - last_time.toSec() > 2.0f) {
         fg_usetimer = false;
         last_time = ros::Time::now();
         return true;
