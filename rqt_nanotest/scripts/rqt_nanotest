@@ -1,0 +1,12 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+
+import sys
+
+from rqt_nanotest.my_module import MyPlugin
+from rqt_gui.main import Main
+
+plugin = 'rqt_nanotest'
+main = Main(filename=plugin)
+sys.exit(main.main(standalone=plugin))
