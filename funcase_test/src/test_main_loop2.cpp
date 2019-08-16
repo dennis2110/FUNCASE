@@ -343,8 +343,8 @@ int main(int argc, char **argv)
   ros::Rate r(30);
 
   // select stage
-  //printf("set stage:\n");  
-  //scanf("%d",&stage);
+  printf("set stage:\n");  
+  scanf("%d",&stage);
   //  
 
   while (ros::ok())

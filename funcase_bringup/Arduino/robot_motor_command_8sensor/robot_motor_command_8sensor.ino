@@ -6,8 +6,8 @@
 #define L1 2
 #define L2 3
 
-#define SEN_R 13
-#define SEN_L 11
+#define SEN_R 11
+#define SEN_L 10
 
 Motor motorR(EN_R, R1, R2);
 Motor motorL(EN_L, L1, L2);
@@ -99,9 +99,9 @@ void loop() {
 //    writecmd[i+2] = (uint8_t)MotorCMD[i];
 //  }
 
-  writecmd[2]= map(analogRead(A0),0,900,0,255);
+  writecmd[2]= map(analogRead(A0),0,1023,0,255);
   writecmd[3]= map(analogRead(A1),0,1023,0,255);
-  writecmd[4]= map(analogRead(A2),0,900,0,255);
+  writecmd[4]= map(analogRead(A2),0,1023,0,255);
   writecmd[5]= map(analogRead(A3),0,1023,0,255);
   writecmd[6]= map(analogRead(A4),0,1023,0,255);
   writecmd[7]= map(analogRead(A5),0,1023,0,255);
