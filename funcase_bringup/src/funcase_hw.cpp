@@ -134,12 +134,12 @@ void FuncaseRobot::wheelcmd2writediff(double cmd,int n){
 void FuncaseRobot::publish_sensor_data(){
   std_msgs::UInt8MultiArray sensor_msg;
 #ifdef NORMALIZE_CNY70
-  sensor_msg.data.push_back(normalize(cny70[0], 50, 10));
-  sensor_msg.data.push_back(normalize(cny70[1], 70, 10));
-  sensor_msg.data.push_back(normalize(cny70[2], 70, 10));
-  sensor_msg.data.push_back(normalize(cny70[3], 70, 10));
-  sensor_msg.data.push_back(normalize(cny70[4], 70, 10));
-  sensor_msg.data.push_back(normalize(cny70[5], 70, 10));
+  sensor_msg.data.push_back(normalize(cny70[0], 110, 10));
+  sensor_msg.data.push_back(normalize(cny70[1], 90, 10));
+  sensor_msg.data.push_back(normalize(cny70[2], 90, 10));
+  sensor_msg.data.push_back(normalize(cny70[3], 100, 10));
+  sensor_msg.data.push_back(normalize(cny70[4], 110, 10));
+  sensor_msg.data.push_back(normalize(cny70[5], 110, 10));
   sensor_msg.data.push_back(cny70[6]);
 #else
   for (int i=0;i<SENSOR_REG_COUNT;i++) {

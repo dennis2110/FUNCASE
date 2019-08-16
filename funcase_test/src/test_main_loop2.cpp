@@ -888,12 +888,12 @@ void changeControllers(int _stage, ros::ServiceClient* _funcase_client,ros::Serv
     //moveit_msg.data.push_back(200);
     //moveit_msg.data.push_back(230);
     if(turn > 0){
-      moveit_msg.data.push_back(170+turn);
+      moveit_msg.data.push_back(180+turn);
       moveit_msg.data.push_back(210); 
       printf("r speed: %d\n", 160+turn);
       printf("l speed: %d\n\n", 190); 
     }else{
-      moveit_msg.data.push_back(170);
+      moveit_msg.data.push_back(180);
       moveit_msg.data.push_back(210-turn);
       printf("r speed: %d\n", 160);
       printf("l speed: %d\n\n", 190-turn);
@@ -955,7 +955,7 @@ void changeControllers(int _stage, ros::ServiceClient* _funcase_client,ros::Serv
     switch_control.request.stop_controllers.push_back("move_it_controller");
     switch_control.request.start_controllers.push_back("track_line_controller");
     switch_enable = true;
-    SetLineDynamicParams(&dynamic_msg, 0.2,0.0,4.7,100.0);
+    SetLineDynamicParams(&dynamic_msg, 0.2,0.0,4.6,110.0);
     dynamic_srv.request.config = dynamic_msg;
     dyline_enable = true;
     break;
@@ -1125,19 +1125,19 @@ void changeControllers(int _stage, ros::ServiceClient* _funcase_client,ros::Serv
     break;
 
   case 27:
-    error = -(cot_angle(yaw)) + (0.42 - get_right_distence(cot_angle(yaw)))*3;
+    error = -(cot_angle(yaw)) + (0.43 - get_right_distence(cot_angle(yaw)))*3;
     error_dot = error - error_back;
     error_back= error;
 
     turn = static_cast<int16_t>(ORIENT_plus_RIGHT_KP*error + ORIENT_plus_RIGHT_KD*error_dot);
 
     if(turn > 0){
-      moveit_msg.data.push_back(240+turn);
+      moveit_msg.data.push_back(244+turn);
       moveit_msg.data.push_back(255); 
       printf("r speed: %d\n", 160+turn);
       printf("l speed: %d\n\n", 190); 
     }else{
-      moveit_msg.data.push_back(240);
+      moveit_msg.data.push_back(244);
       moveit_msg.data.push_back(255-turn);
       printf("r speed: %d\n", 160);
       printf("l speed: %d\n\n", 190-turn);
@@ -1179,7 +1179,7 @@ void changeControllers(int _stage, ros::ServiceClient* _funcase_client,ros::Serv
       moveit_msg.data.push_back(110);
       moveit_msg.data.push_back(-110);
     }else{
-      moveit_msg.data.push_back(110);
+      moveit_msg.data.push_back(120);
       moveit_msg.data.push_back(-150);
     }
     pubmsg_enable = true;
@@ -1189,7 +1189,7 @@ void changeControllers(int _stage, ros::ServiceClient* _funcase_client,ros::Serv
     switch_control.request.stop_controllers.push_back("move_it_controller");
     switch_control.request.start_controllers.push_back("track_line_controller");
     switch_enable = true;
-    SetLineDynamicParams(&dynamic_msg, -0.2,0.0,-5.0,85.0);
+    SetLineDynamicParams(&dynamic_msg, -0.2,0.0,-5.0,90.0);
     dynamic_srv.request.config = dynamic_msg;
     dyline_enable = true;
     back_speed = 85;
@@ -1337,7 +1337,7 @@ void changeControllers(int _stage, ros::ServiceClient* _funcase_client,ros::Serv
   case 31:
     switch_control.request.stop_controllers.push_back("move_it_controller");
     switch_control.request.start_controllers.push_back("track_line_controller");
-    SetLineDynamicParams(&dynamic_msg, 0.5,0.00005,11.0,125.0);
+    SetLineDynamicParams(&dynamic_msg, 0.5,0.00005,7.5,125.0);
     dynamic_srv.request.config = dynamic_msg;
     dyline_enable = true;
     switch_enable = true;
@@ -1374,15 +1374,15 @@ void changeControllers(int _stage, ros::ServiceClient* _funcase_client,ros::Serv
     turn = static_cast<int16_t>(turndeg_kp*error + turndeg_kd*error_dot);
 
     if(turn > 0){
-      moveit_msg.data.push_back(turn+100);
-      moveit_msg.data.push_back(-turn-125);
-      printf("l speed: %d\n", turn+100);
-      printf("r speed: %d\n", -turn-125);
+      moveit_msg.data.push_back(turn+110);
+      moveit_msg.data.push_back(-turn-135);
+      printf("l speed: %d\n", turn+110);
+      printf("r speed: %d\n", -turn-135);
     }else{
-      moveit_msg.data.push_back(turn-100);
-      moveit_msg.data.push_back(-turn+125);
-      printf("l speed: %d\n", turn-100);
-      printf("r speed: %d\n", -turn+125);
+      moveit_msg.data.push_back(turn-110);
+      moveit_msg.data.push_back(-turn+135);
+      printf("l speed: %d\n", turn-110);
+      printf("r speed: %d\n", -turn+135);
     }
 
     printf("error: %4.3f\n",error);
