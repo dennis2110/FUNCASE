@@ -17,11 +17,18 @@ gpio.setup(button, gpio.IN)
 #pub = rospy.Publisher('button_status', Bool, queue_size = 1)
 #rate = rospy.Rate(10)
 
-while stat == False:
+while stat == False and not rospy.is_shutdown():
     status = gpio.input(button)
     print "button status :", status
     if status == 1:
         stat = True
-
-os.system("rosrun funcase_test test_main_loop2")
+'''
+while rospy.is_shutdown():
+    status = gpio.input(button)
+    print "button status :", status
+    if status == 1:
+        stat = True
+'''
+if stat == True:
+    os.system("rosrun funcase_test test_main_loop2")
 
