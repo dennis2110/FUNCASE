@@ -28,6 +28,8 @@
 #define S_TRACK_LINE_KI      (0.00005)
 #define S_TRACK_LINE_KD      (7.5)
 
+#define FINAL_FRONT_DISTENCE  (3.0f)
+
 
 #define SENSOR_REG_COUNT (7)
 #define SIZE_DATA_RECOARD (10)
@@ -1357,15 +1359,21 @@ void changeControllers(int _stage, ros::ServiceClient* _funcase_client,ros::Serv
     break;
 
   case 33:
-    SetLineDynamicParams(&dynamic_msg, 0.2,0.0,6.0,130.0);
-    dynamic_srv.request.config = dynamic_msg;
-    dyline_enable = true;
-    break;
-
-  case 34:
     switch_control.request.stop_controllers.push_back("track_line_controller");
     switch_control.request.start_controllers.push_back("move_it_controller");
     switch_enable = true;
+    wallrange = right_length;
+    break;
+
+  case 34:
+    error = -(cot_angle(yaw-(M_PI * 180.0/180.0))) + (wallrange - get_right_distence(cot_angle(yaw-(M_PI * 180.0/180.0))))*5;
+    error_dot = error - error_back;
+    error_back= error;
+
+    turn = static_cast<int16_t>(ORIENT_RIGHT_KP*error + ORIENT_RIGHT_KD*error_dot);
+    moveit_msg.data.push_back(100+turn);
+    moveit_msg.data.push_back(100-turn+10);
+    pubmsg_enable = true;
     break;
 
   case 35:
@@ -2306,23 +2314,7 @@ bool stage_change_detect(int _stage){
     break;
 
   case 33:
-    if(!fg_usetimer){
-      last_time = ros::Time::now();
-      fg_usetimer = true;
-    }
-    if(fg_usetimer){
-      if(ros::Time::now().toSec() - last_time.toSec() > 2.0) {
-        if(get_sensor_average() < 30){
-          fg_usetimer = false;
-          last_time = ros::Time::now();
-          return true;
-        }
-      }
-    }
-    break;
-
-  case 34:
-     //change controller duration
+    //change controller duration
     if(!fg_usetimer){
       last_time = ros::Time::now();
       fg_usetimer = true;
@@ -2333,6 +2325,18 @@ bool stage_change_detect(int _stage){
         last_time = ros::Time::now();
         return true;
       }
+    }
+    break;
+
+  case 34:
+    if(get_front_distence(cot_angle(-yaw)) < FINAL_FRONT_DISTENCE){
+        laser_distence_overlimit_conter++;
+    }
+    if(laser_distence_overlimit_conter > 2 ) {
+      laser_distence_overlimit_conter = 0;
+      error_dot = 0.0;
+      error_back= 0.0;
+      return true;
     }
     break;
 
