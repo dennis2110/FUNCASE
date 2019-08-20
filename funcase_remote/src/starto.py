@@ -30,5 +30,5 @@ while rospy.is_shutdown():
         stat = True
 '''
 if stat == True:
-    os.system("rosrun funcase_test test_main_loop2")
+    os.system("rosrun funcase_test test_main_loop")
 
